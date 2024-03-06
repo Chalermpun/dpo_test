@@ -9,18 +9,28 @@ lora_r: 128
 lora_alpha: 128
 lora_dropout: 0.05
 lora_target_modules:
-- Wqkv
-- up_proj
-- out_proj
-- down_proj
+  - Wqkv
+  - up_proj
+  - out_proj
+  - down_proj
 
 # Data training arguments
 
 dataset_mixer:
-  /workspace/dpo_test/scripts/responses_ranking.jsonl: 1.0
+  data_path_dpo:
+    - null # TH dataset /workspace/dpo_test/scripts/responses_ranking.jsonl
+    - HuggingFaceH4/ultrafeedback_binarized # EN dataset
+  select_num_en: 100 # number of samples from EN if null then all
+  select_num_th: null # number of samples from TH if null then all
+  prompt_length: 98
+  max_seq_length_chosen: 98
+  max_seq_length_rejected: 98
+  random_seed: 42
+  test_size: 0.0001
+
 dataset_splits:
-- train_prefs
-- test_prefs
+  - train_prefs
+  - test_prefs
 preprocessing_num_workers: 4
 
 # DPOTrainer arguments

@@ -81,46 +81,85 @@ def main():
     ###############
 
     tokenizer = AutoTokenizer.from_pretrained(
-        model_args.model_name_or_path
-        if model_args.tokenizer_name_or_path is None
-        else model_args.tokenizer_name_or_path,
+        (
+            model_args.model_name_or_path
+            if model_args.tokenizer_name_or_path is None
+            else model_args.tokenizer_name_or_path
+        ),
         revision=model_args.model_revision,
-        trust_remote_code=True
+        trust_remote_code=True,
     )
 
     # raw_datasets = get_datasets(data_args, splits=data_args.dataset_splits)
-    dataset_path = list(data_args.dataset_mixer.keys())[0]
-    raw_datasets = dpo_data(dataset_path, tokenizer )
-    # train = raw_datasets['train'].select(range(50))
-    # test = raw_datasets['test'].select(range(1))
-    # raw_datasets = DatasetDict({'train':train, 'test': test})
 
-
-
+    json_path_th = data_args.dataset_mixer["data_path_dpo"][0]
+    english_data_path = data_args.dataset_mixer["data_path_dpo"][1]
+    select_num_en = data_args.dataset_mixer["select_num_en"]
+    select_num_th = data_args.dataset_mixer["select_num_th"]
+    random_state = int(data_args.dataset_mixer["random_seed"])
+    test_size = float(data_args.dataset_mixer["test_size"])
+    raw_datasets = dpo_data(
+        tokenizer,
+        jsonl_path_th=json_path_th if json_path_th else None,
+        english_data_path=english_data_path if english_data_path else None,
+        select_num_th=int(select_num_th) if select_num_th else None,
+        select_num_en=int(select_num_en) if select_num_en else None,
+        random_state=random_state if random_state else None,
+        test_size=test_size if test_size else None,
+    )
 
     # lets find the p95 length of the prompt
-    prompt_length = int(percentile([len(tokenizer(x)["input_ids"]) for x in raw_datasets['train']["text_prompt"]], 98))
-    max_seq_length_chosen = int(percentile([len(tokenizer(x["text_prompt"] + x["text_chosen"])["input_ids"]) for x in raw_datasets['train']], 98))
-    max_seq_length_rejected = int(percentile([len(tokenizer(x["text_prompt"] + x["text_rejected"])["input_ids"]) for x in raw_datasets['train']], 98))
+    prompt_length = int(
+        percentile(
+            [
+                len(tokenizer(x)["input_ids"])
+                for x in raw_datasets["train"]["text_prompt"]
+            ],
+            int(data_args.dataset_mixer["prompt_length"]),
+        )
+    )
+
+    max_seq_length_chosen = int(
+        percentile(
+            [
+                len(tokenizer(x["text_prompt"] + x["text_chosen"])["input_ids"])
+                for x in raw_datasets["train"]
+            ],
+            int(data_args.dataset_mixer["max_seq_length_chosen"]),
+        )
+    )
+    max_seq_length_rejected = int(
+        percentile(
+            [
+                len(tokenizer(x["text_prompt"] + x["text_rejected"])["input_ids"])
+                for x in raw_datasets["train"]
+            ],
+            int(data_args.dataset_mixer["max_seq_length_rejected"]),
+        )
+    )
     max_seq_length = max(max_seq_length_chosen, max_seq_length_rejected)
 
     # filter datasets to remove samples that are too long
-    chosen_dataset = raw_datasets['train'].filter(lambda x: len(tokenizer(x["text_prompt"] + x["text_chosen"])["input_ids"]) <= max_seq_length)
-    rejected_dataset = raw_datasets['train'].filter(lambda x: len(tokenizer(x["text_prompt"] + x["text_rejected"])["input_ids"]) <= max_seq_length)
+    chosen_dataset = raw_datasets["train"].filter(
+        lambda x: len(tokenizer(x["text_prompt"] + x["text_chosen"])["input_ids"])
+        <= max_seq_length
+    )
+    rejected_dataset = raw_datasets["train"].filter(
+        lambda x: len(tokenizer(x["text_prompt"] + x["text_rejected"])["input_ids"])
+        <= max_seq_length
+    )
     print(f"len(chosen_dataset): {len(chosen_dataset)}")
     print(f"len(rejected_dataset): {len(rejected_dataset)}")
     if len(chosen_dataset) > len(rejected_dataset):
-        raw_datasets['train'] = chosen_dataset
+        raw_datasets["train"] = chosen_dataset
     else:
-        raw_datasets['train'] = rejected_dataset
+        raw_datasets["train"] = rejected_dataset
 
     # Up the lengths to next multiple of 2, why 2? Don't know
     prompt_length = ((prompt_length + 1) // 2) * 2
     max_seq_length = ((max_seq_length + 1) // 2) * 2
     print(f"p95 prompt length: {prompt_length}")
     print(f"p95 prompt + chosen length: {max_seq_length}")
-
-
 
     logger.info(
         f"Training on the following splits: {[split + ' : ' + str(dset.num_rows) for split, dset in raw_datasets.items()]}"
@@ -134,8 +173,6 @@ def main():
         "left"  # Truncate from left to ensure we don't lose labels in final turn
     )
 
-
-    
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.unk_token_id
         tokenizer.bos_token_id = tokenizer.unk_token_id
@@ -233,7 +270,6 @@ def main():
             revision=model_args.model_revision,
         )
         model_kwargs = None
-
 
     ref_model = model
     ref_model_kwargs = model_kwargs
