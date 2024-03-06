@@ -1,5 +1,5 @@
 # Model arguments
-model_name_or_path: final_checkpoint
+model_name_or_path: /workspace/sealion/examples/fine_tuning/models_adepter_7B_V31/final_checkpoint
 trust_remote_code: true
 torch_dtype: null
 use_peft: true

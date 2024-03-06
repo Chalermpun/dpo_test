@@ -67,31 +67,33 @@ def dpo_data_prior(
     return df_combinations
 
 
-def dpo_data(jsonl_path: str, background=True, test_size=0.0001) -> DatasetDict:
+def dpo_data(jsonl_path: str, tokenizer, background=True, test_size=0.0001) -> DatasetDict:
     if background:
         prompt_template_real = "### USER:\n{instruction}\n\n### RESPONSE:\n"
     else:
         prompt_template_real = None
-
+    
+    # hhhh = load_dataset("json", jsonl_path)
     ranking = pd.read_json(jsonl_path, lines=True)
     ranking = dpo_data_prior(
         ranking, col_ij="rank_all", background=prompt_template_real
     )
 
     train_df = ranking.to_pandas()
-    train_df["text_chosen"] = train_df["text_chosen"].apply(lambda x: x[1]["content"])
+    train_df["text_chosen"] = train_df["text_chosen"].apply(lambda x: x[1]["content"] + tokenizer.eos_token)
     train_df["text_rejected"] = train_df["text_rejected"].apply(
-        lambda x: x[1]["content"]
+        lambda x: x[1]["content"]+ tokenizer.eos_token
     )
     train_df = train_df.dropna()
     train, test = train_test_split(train_df, test_size=test_size)
     dataset = DatasetDict(
         {"train": Dataset.from_pandas(train), "test": Dataset.from_pandas(test)}
     )
+    print("Here ===> ",dataset["train"][0])
     return dataset
 
 
 # raw_datasets = dpo_data("responses_ranking.jsonl")
 # train = raw_datasets['train'].select(range(500))
-# test = raw_datasets['test'].select(range(500))
+# test = raw_datasets['test'].select(range(4))
 # raw_datasets = DatasetDict({'train':train, 'test': test})

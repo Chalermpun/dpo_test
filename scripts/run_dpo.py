@@ -16,6 +16,7 @@
 import logging
 import random
 import sys
+from numpy import percentile
 
 import torch
 import transformers
@@ -79,12 +80,47 @@ def main():
     # Load datasets
     ###############
 
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_args.model_name_or_path
+        if model_args.tokenizer_name_or_path is None
+        else model_args.tokenizer_name_or_path,
+        revision=model_args.model_revision,
+        trust_remote_code=True
+    )
+
     # raw_datasets = get_datasets(data_args, splits=data_args.dataset_splits)
     dataset_path = list(data_args.dataset_mixer.keys())[0]
-    raw_datasets = dpo_data(dataset_path)
-    train = raw_datasets['train'].select(range(50))
-    test = raw_datasets['test'].select(range(1))
-    raw_datasets = DatasetDict({'train':train, 'test': test})
+    raw_datasets = dpo_data(dataset_path, tokenizer )
+    # train = raw_datasets['train'].select(range(50))
+    # test = raw_datasets['test'].select(range(1))
+    # raw_datasets = DatasetDict({'train':train, 'test': test})
+
+
+
+
+    # lets find the p95 length of the prompt
+    prompt_length = int(percentile([len(tokenizer(x)["input_ids"]) for x in raw_datasets['train']["text_prompt"]], 98))
+    max_seq_length_chosen = int(percentile([len(tokenizer(x["text_prompt"] + x["text_chosen"])["input_ids"]) for x in raw_datasets['train']], 98))
+    max_seq_length_rejected = int(percentile([len(tokenizer(x["text_prompt"] + x["text_rejected"])["input_ids"]) for x in raw_datasets['train']], 98))
+    max_seq_length = max(max_seq_length_chosen, max_seq_length_rejected)
+
+    # filter datasets to remove samples that are too long
+    chosen_dataset = raw_datasets['train'].filter(lambda x: len(tokenizer(x["text_prompt"] + x["text_chosen"])["input_ids"]) <= max_seq_length)
+    rejected_dataset = raw_datasets['train'].filter(lambda x: len(tokenizer(x["text_prompt"] + x["text_rejected"])["input_ids"]) <= max_seq_length)
+    print(f"len(chosen_dataset): {len(chosen_dataset)}")
+    print(f"len(rejected_dataset): {len(rejected_dataset)}")
+    if len(chosen_dataset) > len(rejected_dataset):
+        raw_datasets['train'] = chosen_dataset
+    else:
+        raw_datasets['train'] = rejected_dataset
+
+    # Up the lengths to next multiple of 2, why 2? Don't know
+    prompt_length = ((prompt_length + 1) // 2) * 2
+    max_seq_length = ((max_seq_length + 1) // 2) * 2
+    print(f"p95 prompt length: {prompt_length}")
+    print(f"p95 prompt + chosen length: {max_seq_length}")
+
+
 
     logger.info(
         f"Training on the following splits: {[split + ' : ' + str(dset.num_rows) for split, dset in raw_datasets.items()]}"
@@ -99,16 +135,10 @@ def main():
     )
 
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_args.model_name_or_path
-        if model_args.tokenizer_name_or_path is None
-        else model_args.tokenizer_name_or_path,
-        revision=model_args.model_revision,
-        trust_remote_code=True
-    )
+    
     if tokenizer.pad_token_id is None:
-        tokenizer.pad_token_id = tokenizer.eos_token_id
-        tokenizer.bos_token_id = tokenizer.eos_token_id
+        tokenizer.pad_token_id = tokenizer.unk_token_id
+        tokenizer.bos_token_id = tokenizer.unk_token_id
 
     if data_args.truncation_side is not None:
         tokenizer.truncation_side = data_args.truncation_side
@@ -225,8 +255,8 @@ def main():
         train_dataset=raw_datasets["train"],
         eval_dataset=raw_datasets["test"],
         tokenizer=tokenizer,
-        max_length=training_args.max_length,
-        max_prompt_length=training_args.max_prompt_length,
+        max_length=max_seq_length,
+        max_prompt_length=prompt_length,
         peft_config=get_peft_config(model_args),
         loss_type=training_args.loss_type,
     )
