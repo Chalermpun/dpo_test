@@ -1,7 +1,11 @@
 PATTERNS = {
     "xlsum": [
         {"instruction": "จงเขียนสรุปข่าวต่อไปนี้", "input": "{text}", "output": "{summary}"},
-        {"instruction": "Question: สรุปของข่าวนี้คืออะไร", "input": "Context: {text}", "output": "{summary}"},
+        {
+            "instruction": "Question: สรุปของข่าวนี้คืออะไร",
+            "input": "Context: {text}",
+            "output": "{summary}",
+        },
         {"instruction": "สรุปเนื้อหาสำคัญให้หน่อย", "input": "{text}", "output": "{summary}"},
         {
             "instruction": "สรุปประเด็นสำคัญของข้อความ ให้กระชับและเข้าใจง่าย",
@@ -99,7 +103,11 @@ PATTERNS = {
             "output": "{summary}",
         },
         {"instruction": "ตั้งชื่อพาดหัวข่าวนี้ให้หน่อย", "input": "{body}", "output": "{title}"},
-        {"instruction": "'''{body}'''\n\nตั้งชื่อพาดหัวข่าวข้างต้นให้หน่อย", "input": "", "output": "{title}"},
+        {
+            "instruction": "'''{body}'''\n\nตั้งชื่อพาดหัวข่าวข้างต้นให้หน่อย",
+            "input": "",
+            "output": "{title}",
+        },
         {
             "instruction": "เขียนเนื้อหาข่าว จากหัวข้อข่าวนี้ให้หน่อย",
             "input": "{title}",
@@ -292,7 +300,6 @@ PATTERNS = {
             "input": "",
             "output": "{en}",
         },
-        
     ],
     "han": [
         {
@@ -355,7 +362,7 @@ PATTERNS = {
             "output": "{a}",
         },
     ],
-    "xp3x_enth": [ ## comment: xp3x เป็น QA ล้วนหรือ mixed MRC tasks
+    "xp3x_enth": [  ## comment: xp3x เป็น QA ล้วนหรือ mixed MRC tasks
         {
             "instruction": "Please answer the following question",
             "input": "Q: {inputs}",
@@ -497,13 +504,6 @@ PATTERNS = {
             "output": "{text}",
         },
     ],
-    # "thai_law": [
-    #     {
-    #         "instruction": "จงบอกรายละเอียดของเอกสารต่อไปนี้",
-    #         "input": "{title}",
-    #         "output": "{text}",
-    #     },
-    # ],
     "thai_wiki_dataset_v3": [  # เพิ่ม tp to 10
         {
             "instruction": "จงบอกนิยามของคำต่อไปนี้",
@@ -546,22 +546,12 @@ PATTERNS = {
             "output": "title",
         },
     ],
-    # "thai_oldbooks": [  # วิเคราะ
-    #     {
-    #         "instruction": "ใครเป็นผู้แต่งหนังสือต่อไปนี้",
-    #         "input": "{book}",
-    #         "output": "{author}",
-    #     },
-    # ],
-    # "thai_tnhc2_books": [  # วิเคราะ
-    #     {
-    #         "instruction": "ใครเป็นผู้แต่งหนังสือต่อไปนี้",
-    #         "input": "{book}",
-    #         "output": "{author}",
-    #     },
-    # ],
     "klongklon": [  # no y -> x, 10, not use human
-        {"instruction": "แต่งกลอนแปดต่อจากวรรคนี้", "input": "{context}", "output": "{bot}"},
+        {
+            "instruction": "แต่งกลอนแปดต่อจากวรรคนี้",
+            "input": "{context}",
+            "output": "{bot}",
+        },
         {
             "instruction": "จงเดาวรรคเริ่มต้นของวรรคกลอนแปดต่อไปนี้ ให้คล้องจองกัน",
             "input": "{bot}",
@@ -610,13 +600,6 @@ PATTERNS = {
             "output": "ตอบข้อ {result} เพราะว่า {SolutionExplain}",
         },
     ],
-    # "thai_constitution_corpus": [
-    #     {
-    #         "instruction": "ข้อความต่อไปนี้อยู่ในรัฐธรรมนูญฉบับใด",
-    #         "input": "{txt}",
-    #         "output": "{name}",
-    #     },
-    # ],
     "thai_usembassy": [  # เพิ่ม หัวข้อ ,10 tp
         {
             "instruction": "แปลประโยคหรือย่อหน้าต่อไปนี้ จากภาษาไทยเป็นภาษาอังกฤษ",
