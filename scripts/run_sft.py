@@ -92,11 +92,7 @@ def main():
         configs=data_args.dataset_configs,
         columns_to_keep=[
             "messages",
-            "chosen",
-            "rejected",
             "prompt",
-            "completion",
-            "label",
         ],
     )
     logger.info(
@@ -122,49 +118,28 @@ def main():
     # lets find the p95 length of the prompt
     prompt_length = int(
         percentile(
-            [
-                len(tokenizer(x)["input_ids"])
-                for x in raw_datasets["train"]["text_prompt"]
-            ],
+            [len(tokenizer(x)["input_ids"]) for x in raw_datasets["train"]["prompt"]],
             int(data_args.prompt_length),
         )
     )
 
-    max_seq_length_chosen = int(
+    max_seq_length = int(
         percentile(
             [
-                len(tokenizer(x["text_prompt"] + x["text_chosen"])["input_ids"])
+                len(tokenizer(x["prompt"] + x["output"])["input_ids"])
                 for x in raw_datasets["train"]
             ],
-            int(data_args.max_seq_length_chosen),
+            int(data_args.max_seq_length),
         )
     )
-    max_seq_length_rejected = int(
-        percentile(
-            [
-                len(tokenizer(x["text_prompt"] + x["text_rejected"])["input_ids"])
-                for x in raw_datasets["train"]
-            ],
-            int(data_args.max_seq_length_rejected),
-        )
-    )
-    max_seq_length = max(max_seq_length_chosen, max_seq_length_rejected)
+    max_seq_length = max(max_seq_length)
 
     # filter datasets to remove samples that are too long
     chosen_dataset = raw_datasets["train"].filter(
-        lambda x: len(tokenizer(x["text_prompt"] + x["text_chosen"])["input_ids"])
-        <= max_seq_length
-    )
-    rejected_dataset = raw_datasets["train"].filter(
-        lambda x: len(tokenizer(x["text_prompt"] + x["text_rejected"])["input_ids"])
+        lambda x: len(tokenizer(x["prompt"] + x["output"])["input_ids"])
         <= max_seq_length
     )
     print(f"len(chosen_dataset): {len(chosen_dataset)}")
-    print(f"len(rejected_dataset): {len(rejected_dataset)}")
-    if len(chosen_dataset) > len(rejected_dataset):
-        raw_datasets["train"] = chosen_dataset
-    else:
-        raw_datasets["train"] = rejected_dataset
 
     # Up the lengths to next multiple of 2, why 2? Don't know
     prompt_length = ((prompt_length + 1) // 2) * 2
