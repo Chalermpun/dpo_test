@@ -1,5 +1,11 @@
 from templates import PATTERNS
-from datasets import load_dataset, DatasetDict, Dataset
+from datasets import (
+    load_dataset,
+    DatasetDict,
+    Dataset,
+    load_from_disk,
+    concatenate_datasets,
+)
 from tqdm import tqdm
 import json
 import glob
@@ -7,6 +13,10 @@ import re
 import pandas as pd
 import numpy.random as random
 from typing import List
+import numpy as np
+from tabulate import tabulate
+
+pd.set_option("display.float_format", None)
 
 
 def scb_translation(example):
@@ -39,7 +49,9 @@ def wisesight_sentiment_category(
     feelings: List[dict] = [
         {2: "เชิงลบ", 1: "เป็นกลาง", 0: "เชิงบวก"},
         {2: "negative", 1: "neutral", 0: "positive"},
-        {2: "รู้สึกไม่ดี", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+        {2: "รู้สึกแย่", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+        {2: "bad", 1: "neutral", 0: "good"},
+        {2: "terrible", 1: "neutral", 0: "great"},
     ],
 ):
     feeling = random.choice(feelings)
@@ -106,7 +118,9 @@ def wongnai_reviews_sentiment(
     feelings: List[dict] = [
         {2: "เชิงลบ", 1: "เป็นกลาง", 0: "เชิงบวก"},
         {2: "negative", 1: "neutral", 0: "positive"},
-        {2: "รู้สึกไม่ดี", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+        {2: "รู้สึกแย่", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+        {2: "bad", 1: "neutral", 0: "good"},
+        {2: "terrible", 1: "neutral", 0: "great"},
     ],
 ):
     def convert_star_rating_to_sentiment(rating):
@@ -138,7 +152,9 @@ def thai_sentiment_analysis_dataset_answer(
     feelings: List[dict] = [
         {2: "เชิงลบ", 1: "เป็นกลาง", 0: "เชิงบวก"},
         {2: "negative", 1: "neutral", 0: "positive"},
-        {2: "รู้สึกไม่ดี", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+        {2: "รู้สึกแย่", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+        {2: "bad", 1: "neutral", 0: "good"},
+        {2: "terrible", 1: "neutral", 0: "great"},
     ],
 ):
     def answer_sentiment(answer):
@@ -173,6 +189,31 @@ def save_list_to_jsonl(data_list, filename):
             file.write(json_line + "\n")
 
 
+def deEmojify(text):
+    regrex_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"  # emoticons
+        "\U0001F300-\U0001F5FF"  # symbols & pictographs
+        "\U0001F680-\U0001F6FF"  # transport & map symbols
+        "\U0001F1E0-\U0001F1FF"  # flags (iOS)
+        "\U00002702-\U000027B0"
+        "\U000024C2-\U0001F251"
+        "\U0001f926-\U0001f937"
+        "\U00010000-\U0010ffff"
+        "\u200d"
+        "\u2640-\u2642"
+        "\u2600-\u2B55"
+        "\u23cf"
+        "\u23e9"
+        "\u231a"
+        "\u3030"
+        "\ufe0f"
+        "]+",
+        flags=re.UNICODE,
+    )
+    return regrex_pattern.sub(r"", text)
+
+
 def dataset_to_generator(dataset, pattern_name: str, source: str, task: str):
     if dataset is None:
         return  # If dataset is None, do nothing.
@@ -181,9 +222,9 @@ def dataset_to_generator(dataset, pattern_name: str, source: str, task: str):
     for i, row in enumerate(tqdm(dataset, total=len(dataset))):
         pattern = patterns[i]
         data = {
-            "instruction": pattern["instruction"].format(**row),
-            "input": pattern["input"].format(**row),
-            "output": pattern["output"].format(**row),
+            "instruction": deEmojify(pattern["instruction"].format(**row)),
+            "input": deEmojify(pattern["input"].format(**row)),
+            "output": deEmojify(pattern["output"].format(**row)),
             "template": pattern,
             "source": source,
             "task": task,
@@ -222,7 +263,138 @@ def reformat(dataset_dict: DatasetDict, pattern_name: str, source: str, task: st
     return datas
 
 
+def wiki_lingua_mep(example):
+    lang_th = ["ไทย", "Thai"]
+    lang_en = ["อังกฤษ", "English"]
+
+    lang_th_rand = random.choice(lang_th)
+    lang_en_rand = random.choice(lang_en)
+
+    example["source_lang"] = (
+        lang_en_rand if example["source_language"] == "en" else lang_th_rand
+    )
+    example["target_lang"] = (
+        lang_en_rand if example["target_language"] == "en" else lang_th_rand
+    )
+    return example
+
+
+def add_prefix(example):
+    a = example["text"].split("<bot>:")
+
+    example["bot_morethan_one"] = len(a)
+    example["has_context"] = 1 if "<context>:" in example["text"] else 0
+
+    v = example["text"]
+
+    # Find the indices of the tags
+    context_index = v.find("<context>:")
+    human_index = v.find("<human>:")
+    bot_index = v.find("<bot>:")
+
+    context = v[context_index:human_index].replace("<context>:", "").strip()
+    human = v[human_index:bot_index].replace("<human>:", "").strip()
+    bot = v[bot_index:].replace("<bot>:", "").strip()
+
+    combined = ""
+    if context != "":
+        combined = context + "\n" + human
+    else:
+        combined = human
+
+    example["Context"] = ""
+    example["Instruction"] = combined.strip()
+    example["Answer"] = bot.strip()
+
+    return example
+
+
 def create_flan_dataset(split="train"):
+
+    ### add new dataset by Beer ######
+
+    dataset_wangchanglm = load_dataset("pythainlp/final_training_set_v1", split=split)
+    dataset_wangchanglm = dataset_wangchanglm.map(
+        add_prefix, load_from_cache_file=False
+    )
+    dataset_wangchanglm = dataset_wangchanglm.filter(
+        lambda x: x["bot_morethan_one"] == 2
+    )
+    dataset_wangchanglm_list = reformat(
+        dataset_wangchanglm, "dataset_wangchanglm", "dataset_wangchanglm", "generation"
+    )
+    print(np.random.choice(dataset_wangchanglm_list, size=3, replace=False))
+    dataset_tiny = load_dataset("nampdn-ai/tiny-codes", split=split).filter(
+        lambda example: example["programming_language"]
+        in ["JavaScript", "Python", "relation database and SQL"]
+    )
+    print(dataset_tiny)
+    dataset_tiny_list = reformat(
+        dataset_tiny, "tiny_code", "dataset_tiny", "generation"
+    )
+    print(np.random.choice(dataset_tiny_list, size=3, replace=False))
+
+    flan_v2_cot = load_dataset("SirNeural/flan_v2", split=split)
+    flan_v2_cot = flan_v2_cot.filter(
+        lambda example: example["task"] in ["cot", "dialog", "flan"]
+    )
+    print(flan_v2_cot)
+    flan_v2_cot_list = reformat(flan_v2_cot, "flan_v2", "flan_v2_cot", "generation")
+    print(np.random.choice(flan_v2_cot_list, size=3, replace=False))
+
+    # flan_v2_dialog = load_dataset("SirNeural/flan_v2", split="train")
+    # flan_v2_dialog = flan_v2_dialog.filter(lambda example: example["task"] == "dialog")
+    # random_test_ids = random.sample(range(len(flan_v2_dialog)), k=100000)
+    # flan_v2_dialog = flan_v2_dialog.select(random_test_ids)
+    # print(flan_v2_dialog)
+    # flan_v2_dialog_list = reformat(
+    #     flan_v2_dialog, "flan_v2", "flan_v2_dialog", "generation"
+    # )
+
+    alt_dataset = load_dataset(
+        "alt", "alt-parallel", split=split
+    )  # .select(range(number_rand))
+    alt_dataset = alt_dataset.map(scb_translation, load_from_cache_file=False)
+    alt_dataset_list = reformat(
+        alt_dataset, "scb_mt_en_th", "alt_dataset", "translation"
+    )
+
+    ted_talks_iwslt2014 = load_dataset(
+        "ted_talks_iwslt", language_pair=("en", "th"), year="2014", split=split
+    )  # .select(range(number_rand))
+    ted_talks_iwslt2015 = load_dataset(
+        "ted_talks_iwslt", language_pair=("en", "th"), year="2015", split=split
+    )  # .select(range(number_rand))
+    ted_talks_iwslt2016 = load_dataset(
+        "ted_talks_iwslt", language_pair=("en", "th"), year="2016", split=split
+    )  # .select(range(number_rand))
+
+    ted_talks_iwslt2014 = ted_talks_iwslt2014.map(
+        scb_translation, load_from_cache_file=False
+    )
+    ted_talks_iwslt2014_list = reformat(
+        ted_talks_iwslt2014, "scb_mt_en_th", "ted_talks_iwslt2014", "translation"
+    )
+    ted_talks_iwslt2015 = ted_talks_iwslt2015.map(
+        scb_translation, load_from_cache_file=False
+    )
+    ted_talks_iwslt2015_list = reformat(
+        ted_talks_iwslt2015, "scb_mt_en_th", "ted_talks_iwslt2015", "translation"
+    )
+    ted_talks_iwslt2016 = ted_talks_iwslt2016.map(
+        scb_translation, load_from_cache_file=False
+    )
+    ted_talks_iwslt2016_list = reformat(
+        ted_talks_iwslt2016, "scb_mt_en_th", "ted_talks_iwslt2016", "translation"
+    )
+    wiki_lingua = load_dataset(
+        "GEM/wiki_lingua", "en_th", split=split
+    )  # .select(range(number_rand))
+    wiki_lingua = wiki_lingua.map(wiki_lingua_mep, load_from_cache_file=False)
+    wiki_lingua_list = reformat(
+        wiki_lingua, "wiki_lingua", "wiki_lingua", "summarization"
+    )
+    ### End add new dataset by Beer ######
 
     ################# load dataset from huggingface
     xlsum = load_dataset("csebuetnlp/xlsum", "thai", split=split)
@@ -230,17 +402,24 @@ def create_flan_dataset(split="train"):
     thaisum = load_dataset("thaisum", split=split)
 
     scb_enth = load_dataset("scb_mt_enth_2020", "enth", split=split)
-    scb_enth = scb_enth.map(scb_translation)
+    scb_enth = scb_enth.map(scb_translation, load_from_cache_file=False)
 
-    han = load_dataset("pythainlp/han-instruct-dataset-v1.0", split=split)
-    han = han.rename_columns({"inputs": "q", "targets": "a"})
+    han = pd.read_excel("/workspace/sealion/examples/han_instruct-v2.xls")
+    han = Dataset.from_pandas(han)
+    han_dataset = DatasetDict()
+    han_dataset["train"] = han
+    han_dataset["train"] = han_dataset["train"].remove_columns("Unnamed: 0")
 
     all_file_xp3x = read_file_xp3x()
     xp3x = load_dataset("json", data_files=all_file_xp3x, split=split)
-    xp3x = xp3x.filter(lambda example: example["config"] == "eng_Latn-tha_Thai")
+    xp3x = xp3x.filter(lambda example: example["config"] in ["thai", "en_th"])
     xp3x = DatasetDict({"train": xp3x})
 
     platypus = load_dataset("garage-bAInd/Open-Platypus", split=split)
+    platypus = platypus.filter(
+        lambda example: example["data_source"] != "scienceqa"
+        and example["data_source"] != "reclor"
+    )
 
     wisesight_sentiment = load_dataset("wisesight_sentiment", split=split)
     wisesight_sentiment = wisesight_sentiment.filter(
@@ -252,9 +431,12 @@ def create_flan_dataset(split="train"):
             "feelings": [
                 {2: "เชิงลบ", 1: "เป็นกลาง", 0: "เชิงบวก"},
                 {2: "negative", 1: "neutral", 0: "positive"},
-                {2: "รู้สึกไม่ดี", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+                {2: "รู้สึกแย่", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+                {2: "bad", 1: "neutral", 0: "good"},
+                {2: "terrible", 1: "neutral", 0: "great"},
             ]
         },
+        load_from_cache_file=False,
     )
     wisesight_sentiment = wisesight_sentiment.rename_columns({"texts": "text"})
 
@@ -263,7 +445,7 @@ def create_flan_dataset(split="train"):
     thai_wiki_dataset_v3 = load_dataset("pythainlp/thai-wiki-dataset-v3", split=split)
 
     klongklon = load_dataset("pythainlp/klongklon", split=split)
-    klongklon = klongklon.map(context_bot_human)
+    klongklon = klongklon.map(context_bot_human, load_from_cache_file=False)
 
     thai_investment_consultant_licensing_exams = load_dataset(
         "openthaigpt/thai-investment-consultant-licensing-exams", split=split
@@ -282,7 +464,8 @@ def create_flan_dataset(split="train"):
 
     thai_investment_consultant_licensing_exams = (
         thai_investment_consultant_licensing_exams.map(
-            thai_investment_consultant_licensing_exams_answer
+            thai_investment_consultant_licensing_exams_answer,
+            load_from_cache_file=False,
         )
     )
 
@@ -295,9 +478,12 @@ def create_flan_dataset(split="train"):
             "feelings": [
                 {2: "เชิงลบ", 1: "เป็นกลาง", 0: "เชิงบวก"},
                 {2: "negative", 1: "neutral", 0: "positive"},
-                {2: "รู้สึกไม่ดี", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+                {2: "รู้สึกแย่", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+                {2: "bad", 1: "neutral", 0: "good"},
+                {2: "terrible", 1: "neutral", 0: "great"},
             ]
         },
+        load_from_cache_file=False,
     )
 
     tacas61 = pd.read_csv(
@@ -325,9 +511,12 @@ def create_flan_dataset(split="train"):
             "feelings": [
                 {2: "เชิงลบ", 1: "เป็นกลาง", 0: "เชิงบวก"},
                 {2: "negative", 1: "neutral", 0: "positive"},
-                {2: "รู้สึกไม่ดี", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+                {2: "รู้สึกแย่", 1: "รู้สึกเฉยๆ", 0: "รู้สึกดี"},
+                {2: "bad", 1: "neutral", 0: "good"},
+                {2: "terrible", 1: "neutral", 0: "great"},
             ]
         },
+        load_from_cache_file=False,
     )
 
     thai_english_transliteration_dictionary = load_dataset(
@@ -361,9 +550,7 @@ def create_flan_dataset(split="train"):
     )
     xp3x_list = reformat(xp3x, "xp3x_enth", "CohereForAI/xP3x", "other")
 
-    han_list = reformat(
-        han, "han", "pythainlp/han-instruct-dataset-v1.0", "text-generation"
-    )
+    han_list = reformat(han_dataset, "han", "han-dataset", "text-generation")
     platypus_list = reformat(
         platypus, "platypus", "garage-bAInd/Open-Platypus", "other"
     )
@@ -461,8 +648,61 @@ def create_flan_dataset(split="train"):
         + prd_news_30112023_list
         + aya_dataset_list
         + aya_collection_templated_xlel_wd_list
+        + alt_dataset_list
+        + ted_talks_iwslt2014_list
+        + ted_talks_iwslt2015_list
+        + ted_talks_iwslt2016_list
+        + wiki_lingua_list
+        + dataset_wangchanglm_list
+        + dataset_tiny_list
+        + flan_v2_cot_list
     )
     return flan_list
+
+
+def add_new_dataset(dataset1, dataset2, splits=["train", "train_sft"]):
+    dataset1 = dataset1[splits[0]].select_columns(["messages", "prompt"])
+    dataset2 = dataset2[splits[1]].select_columns(["messages", "prompt"])
+    new_dataset = concatenate_datasets([dataset1, dataset2])
+    return new_dataset
+
+
+def update_metadata(metadata1, metadata2):
+    metadata1.update(metadata2)
+    return metadata1
+
+
+def create_metadata(dataset, split="train", names="ultrachat_200k"):
+    dataset = dataset[split].to_pandas()
+    if "source" not in dataset.columns:
+        metadata = dict()
+        metadata[names] = len(dataset)
+        return metadata
+    else:
+        grouped = dataset.groupby(["source"])
+        metadata = dict()
+        for source, group in grouped:
+            metadata[source] = len(group)
+        return metadata
+
+
+def save_metadata(metadata, path):
+    metadata_df = pd.DataFrame.from_dict(metadata, orient="index")
+    metadata_df = metadata_df.reset_index()
+    metadata_df.columns = ["name", "rows"]
+    row_sum = metadata_df.sum(axis=1)
+    max_string = metadata_df["name"].str.len().max()
+    half_string_max = max_string // 2
+    half_string_max = "=" * half_string_max
+    string_total = half_string_max + " total " + half_string_max
+    total = int(row_sum.sum())
+    metadata_df = metadata_df.append(
+        {"name": string_total, "rows": total}, ignore_index=True
+    )
+    print(tabulate(metadata_df, headers="keys", tablefmt="psql"))
+    with open(path, "w") as f:
+        metadata.update({"aggregate": {"total": total}})
+        json.dump(metadata, f)
 
 
 if __name__ == "__main__":
@@ -471,4 +711,12 @@ if __name__ == "__main__":
     flan_dataset = Dataset.from_list(flan_list)
     flan_dataset_dict = DatasetDict({"train": flan_dataset})
     flan_dataset_dict = flan_dataset_dict.map(reformat_rawdataset)
-    flan_dataset_dict.save_to_disk("/workspace/flan_dataset/flan")
+    ultrachat = load_dataset("HuggingFaceH4/ultrachat_200k")
+
+    metadata_ultrachat = create_metadata(ultrachat, "train_sft")
+    metadata_flan = create_metadata(flan_dataset_dict, "train")
+    metadata = update_metadata(metadata_ultrachat, metadata_flan)
+    save_metadata(metadata, "./metadata/metadata.json")
+
+    raw_datasets = add_new_dataset(flan_dataset_dict, ultrachat)
+    raw_datasets.save_to_disk("/workspace/flan_dataset/flan_v1")

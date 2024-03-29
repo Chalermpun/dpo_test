@@ -879,4 +879,117 @@ PATTERNS = {
     "aya_collection_templated_xlel_wd": [
         {"instruction": "{inputs}", "input": "", "output": "{targets}"}
     ],
+    "wiki_lingua": [
+        {
+            "instruction": "จงเขียนสรุปข่าวต่อไปนี้ จาก {source_lang} ไป {target_lang}",
+            "input": "{source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "Question: สรุป {target_lang} ของข่าวนี้คืออะไร",
+            "input": "Context: {source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "สรุปเนื้อหาสำคัญให้หน่อย เป็น {target_lang}",
+            "input": "{source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "สรุปประเด็นสำคัญของข้อความ ให้กระชับและเข้าใจง่าย โดยคำตอบจะต้องเป็น {target_lang}",
+            "input": "{source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "อะไรคือประเด็นสำคัญของข้อความ คำตอบจะต้องเป็น {target_lang}",
+            "input": "{source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "สร้างเนื้อหาข่าวฉบับเต็ม จากสรุปที่ให้ไป โดยสรุปที่จะให้ต่อไปนี้เป็นภาษา {target_lang} แต่เนื้อหาข่าวฉบับเต็มจะต้องเป็นภาษา {source_lang}",
+            "input": "{target}",
+            "output": "{source}",
+        },
+        {
+            "instruction": "สร้างเนื้อหาเริ่มต้นในภาษา {source_lang} โดยมีเนื้อหาสรุปอ้างอิงเป็น {target_lang} คือ: '{target}'",
+            "input": "",
+            "output": "{source}",
+        },
+        {
+            "instruction": "Instruction: Please summarize context in {target_lang}.",
+            "input": "Context: {source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "'''{source}'''\n\nจงสรุปเนื้อหาข่าวข้างต้นเป็นภาษา {target_lang}",
+            "input": "",
+            "output": "{target}",
+        },
+        {
+            "instruction": "นายคือผู้ช่วย การสรุปบทความ หรือสรุปเนื้อหาที่เก่ง ในการสรุปความข้ามภาษา (cross lingual summarization)\n\nInstruction: จงสรุปบทความต่อไปนี้จากภาษา {source_lang} เป็น {target_lang}",
+            "input": "{source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "Try to generate a summary from the given context from {source_lang} to {target_lang}",
+            "input": "Context: {source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "Question: from news context in {source_lang}, What is an easy-to-understand summary of the content in {target_lang}?",
+            "input": "Context: {source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "คำถาม: สรุปเนื้อหาภาษา {target_lang} ที่เข้าใจง่ายของข่าวนี้คืออะไร",
+            "input": "พื้นหลัง: {source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "คำสั่ง: จากเนื้อหาข่าวภาษา {source_lang} จงสรุปเนื้อหาเป็น {target_lang} ให้กระชับ เข้าใจง่าย",
+            "input": "เนื้อหาข่าว (news):  {source}",
+            "output": "{target}",
+        },
+        {
+            "instruction": "Construct a pair of cross lingual summarization task. Content should be in {source_lang} and Summary should be in {target_lang}.",
+            "input": "",
+            "output": "Content: {source}\n\nSummary: {target}",
+        },
+        {
+            "instruction": "Summary: {target}\n\nQuestion: can you generate a full content from this summary in {source_lang}?",
+            "input": "",
+            "output": "{source}",
+        },
+    ],
+    "tiny_code": [
+        {
+            "instruction": "Instruction: {prompt}",
+            "input": "",
+            "output": "{response}",
+        },
+        {
+            "instruction": "เขียนโค้ด {prompt}",
+            "input": "",
+            "output": "{response}",
+        },
+        {
+            "instruction": "{prompt}",
+            "input": "",
+            "output": "{response}",
+        },
+    ],
+    "flan_v2": [
+        {
+            "instruction": "{inputs}",
+            "input": "",
+            "output": "{targets}",
+        }
+    ],
+    "dataset_wangchanglm": [
+        {
+            "instruction": "{Instruction}",
+            "input": "",
+            "output": "{Answer}",
+        }
+    ],
 }
