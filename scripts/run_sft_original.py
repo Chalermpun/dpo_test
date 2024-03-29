@@ -24,9 +24,8 @@ import sys
 import datasets
 import torch
 import transformers
-from transformers import AutoModelForCausalLM, set_seed, AutoTokenizer
+from transformers import AutoModelForCausalLM, set_seed
 
-from numpy import percentile
 from alignment import (
     DataArguments,
     H4ArgumentParser,
@@ -42,8 +41,6 @@ from alignment import (
     get_tokenizer,
 )
 from trl import SFTTrainer, setup_chat_format
-from tqdm import tqdm
-from rich.pretty import pprint
 
 
 logger = logging.getLogger(__name__)
@@ -91,6 +88,8 @@ def main():
     raw_datasets = get_datasets(
         data_args,
         splits=data_args.dataset_splits,
+        configs=data_args.dataset_configs,
+        columns_to_keep=["messages", "chosen", "rejected", "prompt", "completion", "label"],
     )
     logger.info(
         f"Training on the following datasets and their proportions: {[split + ' : ' + str(dset.num_rows) for split, dset in raw_datasets.items()]}"
@@ -100,74 +99,14 @@ def main():
     ################
     # Load tokenizer
     ################
-    data_args.truncation_side = (
-        "left"  # Truncate from left to ensure we don't lose labels in final turn
-    )
-    tokenizer = AutoTokenizer.from_pretrained(
-        (
-            model_args.model_name_or_path
-            if model_args.tokenizer_name_or_path is None
-            else model_args.tokenizer_name_or_path
-        ),
-        revision=model_args.model_revision,
-        trust_remote_code=True,
-    )
-    tokenizer.chat_template = data_args.chat_template
-
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token_id = tokenizer.unk_token_id
-        tokenizer.bos_token_id = tokenizer.unk_token_id
-
-    if data_args.truncation_side is not None:
-        tokenizer.truncation_side = data_args.truncation_side
-
-    # Set reasonable default for models without max length
-    if tokenizer.model_max_length > 100_000:
-        tokenizer.model_max_length = 2048
-
-    # lets find the p95 length of the prompt
-    # prompt_length = int(
-    #     percentile(
-    #         [
-    #             len(tokenizer(x)["input_ids"])
-    #             for x in tqdm(raw_datasets["train"]["prompt"], desc="Finding prompt length")
-    #         ],
-    #         int(98),
-    #     )
-    # )
-    #
-    # max_seq_length = int(
-    #     percentile(
-    #         [
-    #             len(tokenizer(x["prompt"] + x["output"])["input_ids"])
-    #             for x in tqdm(raw_datasets["train"], desc="Finding max seq length")
-    #         ],
-    #         int(98),
-    #     )
-    # )
-    # max_seq_length = max(max_seq_length)
-    #
-    # # filter datasets to remove samples that are too long
-    # chosen_dataset = raw_datasets["train"].filter(
-    #     lambda x: len(tokenizer(x["prompt"] + x["output"])["input_ids"])
-    #     <= max_seq_length
-    # )
-    # print(f"len(chosen_dataset): {len(chosen_dataset)}")
-    #
-    # # Up the lengths to next multiple of 2, why 2? Don't know
-    # prompt_length = ((prompt_length + 1) // 2) * 2
-    # max_seq_length = ((max_seq_length + 1) // 2) * 2
-    # print(f"p95 prompt length: {prompt_length}")
-    # print(f"p95 prompt + chosen length: {max_seq_length}")
+    tokenizer = get_tokenizer(model_args, data_args)
 
     #######################
     # Load pretrained model
     #######################
     logger.info("*** Load pretrained model ***")
     torch_dtype = (
-        model_args.torch_dtype
-        if model_args.torch_dtype in ["auto", None]
-        else getattr(torch, model_args.torch_dtype)
+        model_args.torch_dtype if model_args.torch_dtype in ["auto", None] else getattr(torch, model_args.torch_dtype)
     )
     quantization_config = get_quantization_config(model_args)
 
@@ -182,11 +121,15 @@ def main():
     )
 
     model = model_args.model_name_or_path
+    # For ChatML we need to add special tokens and resize the embedding layer
+    if "<|im_start|>" in tokenizer.chat_template:
+        model = AutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, **model_kwargs)
+        model, tokenizer = setup_chat_format(model, tokenizer)
+        model_kwargs = None
 
     #####################
     # Apply chat template
     #####################
-
     raw_datasets = raw_datasets.map(
         apply_chat_template,
         fn_kwargs={
@@ -203,27 +146,18 @@ def main():
     # Decontaminate benchmarks
     ##########################
     num_raw_train_samples = len(raw_datasets["train"])
-    raw_datasets = raw_datasets.filter(
-        decontaminate_humaneval, batched=True, batch_size=10_000, num_proc=1
-    )
+    raw_datasets = raw_datasets.filter(decontaminate_humaneval, batched=True, batch_size=10_000, num_proc=1)
     num_filtered_train_samples = num_raw_train_samples - len(raw_datasets["train"])
     logger.info(
         f"Decontaminated {num_filtered_train_samples} ({num_filtered_train_samples/num_raw_train_samples * 100:.2f}%) samples from the training set."
     )
 
     train_dataset = raw_datasets["train"]
-    eval_dataset = datasets.Dataset.from_dict(
-        raw_datasets["train"][0]
-    )
-    # eval_dataset = raw_datasets["test"]
+    eval_dataset = raw_datasets["test"]
 
-    with training_args.main_process_first(
-        desc="Log a few random samples from the processed training set"
-    ):
+    with training_args.main_process_first(desc="Log a few random samples from the processed training set"):
         for index in random.sample(range(len(raw_datasets["train"])), 3):
-            logger.info(
-                f"Sample {index} of the processed training set:\n\n{raw_datasets['train'][index]['text']}"
-            )
+            logger.info(f"Sample {index} of the processed training set:\n\n{raw_datasets['train'][index]['text']}")
 
     ########################
     # Initialize the Trainer
@@ -237,10 +171,11 @@ def main():
         dataset_text_field="text",
         max_seq_length=training_args.max_seq_length,
         tokenizer=tokenizer,
-        packing=False,
+        packing=True,
         peft_config=get_peft_config(model_args),
         dataset_kwargs=training_args.dataset_kwargs,
     )
+
     ###############
     # Training loop
     ###############
@@ -276,6 +211,7 @@ def main():
         # Restore k,v cache for fast inference
         trainer.model.config.use_cache = True
         trainer.model.config.save_pretrained(training_args.output_dir)
+
     ##########
     # Evaluate
     ##########

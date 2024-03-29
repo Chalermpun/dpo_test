@@ -1,49 +1,43 @@
 # Model arguments
-model_name_or_path: mistralai/Mistral-7B-v0.1
-tokenizer_name_or_path: mistralai/Mistral-7B-v0.1
+model_name_or_path: aisingapore/sea-lion-7b
+tokenizer_name_or_path: aisingapore/sea-lion-7b
 model_revision: main
 torch_dtype: bfloat16
-use_flash_attention_2: true
+use_flash_attention_2: false
 
 # Data training arguments
 chat_template: "{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '### USER:\n' + message['content'] }}\n\n{% elif message['role'] == 'assistant' %}\n{{ '### RESPONSE:\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '### RESPONSE:' }}\n{% endif %}\n{% endfor %}"
 dataset_mixer:
-  HuggingFaceH4/ultrachat_200k: 1.0
+  /workspace/flan_dataset/flan: 0.0001 # size of dataset (fraction of full dataset)
 dataset_splits:
-- train
-preprocessing_num_workers: 12
-prompt_length: 98
-max_seq_length_chosen: 98
-max_seq_length_rejected: 98
-random_seed: 42
-test_size: 0.0001
+  - train
+preprocessing_num_workers: 8
+auto_insert_empty_system_msg: true
 
 # SFT trainer config
 bf16: true
-do_eval: true
+do_eval: false
 evaluation_strategy: epoch
 gradient_accumulation_steps: 1
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: False
-hub_model_id: zephyr-7b-sft-full
-hub_strategy: every_save
 learning_rate: 2.0e-05
 log_level: info
-logging_steps: 5  
+logging_steps: 5
 logging_strategy: steps
 lr_scheduler_type: cosine
 max_seq_length: 2048
 max_steps: -1
 num_train_epochs: 1
-output_dir: data/zephyr-7b-sft-full
+output_dir: data/sealion-7b-sft-full
 overwrite_output_dir: true
-per_device_eval_batch_size: 8
-per_device_train_batch_size: 16
-push_to_hub: true
+per_device_eval_batch_size: 2
+per_device_train_batch_size: 2
+push_to_hub: false
 remove_unused_columns: true
 report_to:
-- wandb
+  - wandb
 save_strategy: "steps"
 save_steps: 100
 save_total_limit: 1
