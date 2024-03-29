@@ -125,41 +125,6 @@ def main():
     if tokenizer.model_max_length > 100_000:
         tokenizer.model_max_length = 2048
 
-    # lets find the p95 length of the prompt
-    # prompt_length = int(
-    #     percentile(
-    #         [
-    #             len(tokenizer(x)["input_ids"])
-    #             for x in tqdm(raw_datasets["train"]["prompt"], desc="Finding prompt length")
-    #         ],
-    #         int(98),
-    #     )
-    # )
-    #
-    # max_seq_length = int(
-    #     percentile(
-    #         [
-    #             len(tokenizer(x["prompt"] + x["output"])["input_ids"])
-    #             for x in tqdm(raw_datasets["train"], desc="Finding max seq length")
-    #         ],
-    #         int(98),
-    #     )
-    # )
-    # max_seq_length = max(max_seq_length)
-    #
-    # # filter datasets to remove samples that are too long
-    # chosen_dataset = raw_datasets["train"].filter(
-    #     lambda x: len(tokenizer(x["prompt"] + x["output"])["input_ids"])
-    #     <= max_seq_length
-    # )
-    # print(f"len(chosen_dataset): {len(chosen_dataset)}")
-    #
-    # # Up the lengths to next multiple of 2, why 2? Don't know
-    # prompt_length = ((prompt_length + 1) // 2) * 2
-    # max_seq_length = ((max_seq_length + 1) // 2) * 2
-    # print(f"p95 prompt length: {prompt_length}")
-    # print(f"p95 prompt + chosen length: {max_seq_length}")
-
     #######################
     # Load pretrained model
     #######################
@@ -211,10 +176,17 @@ def main():
         f"Decontaminated {num_filtered_train_samples} ({num_filtered_train_samples/num_raw_train_samples * 100:.2f}%) samples from the training set."
     )
 
-    train_dataset = raw_datasets["train"]
-    eval_dataset = datasets.Dataset.from_dict(
-        raw_datasets["train"][0]
+    # filter datasets to remove samples that are too long
+    before = len(raw_datasets["train"])
+    raw_datasets = raw_datasets.filter(
+        lambda x: len(tokenizer(x["text"])["input_ids"]) <= tokenizer.model_max_length
     )
+
+    pprint(f"len(raw_datasets['train']) before: {before}")
+    pprint(f"len(raw_datasets['train']) after: {len(raw_datasets['train'])}")
+
+    train_dataset = raw_datasets["train"]
+    eval_dataset = datasets.Dataset.from_dict(raw_datasets["train"][0])
     # eval_dataset = raw_datasets["test"]
 
     with training_args.main_process_first(
