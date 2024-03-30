@@ -62,13 +62,19 @@ def get_quantization_config(model_args: ModelArguments) -> BitsAndBytesConfig | 
     return quantization_config
 
 
-def get_tokenizer(model_args: ModelArguments, data_args: DataArguments) -> PreTrainedTokenizer:
+def get_tokenizer(
+    model_args: ModelArguments, data_args: DataArguments
+) -> PreTrainedTokenizer:
     """Get the tokenizer for the model."""
+    print("[INFO] Loading tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained(
-        model_args.model_name_or_path
-        if model_args.tokenizer_name_or_path is None
-        else model_args.tokenizer_name_or_path,
+        (
+            model_args.model_name_or_path
+            if model_args.tokenizer_name_or_path is None
+            else model_args.tokenizer_name_or_path
+        ),
         revision=model_args.model_revision,
+        trust_remote_code=model_args.trust_remote_code,
     )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -85,6 +91,7 @@ def get_tokenizer(model_args: ModelArguments, data_args: DataArguments) -> PreTr
     elif tokenizer.chat_template is None and tokenizer.default_chat_template is None:
         tokenizer.chat_template = DEFAULT_CHAT_TEMPLATE
 
+    print("[INFO] Done loading tokenizer...")
     return tokenizer
 
 
@@ -112,7 +119,9 @@ def is_adapter_model(model_name_or_path: str, revision: str = "main") -> bool:
     except (HFValidationError, RepositoryNotFoundError):
         # If not, check local repo
         repo_files = os.listdir(model_name_or_path)
-    return "adapter_model.safetensors" in repo_files or "adapter_model.bin" in repo_files
+    return (
+        "adapter_model.safetensors" in repo_files or "adapter_model.bin" in repo_files
+    )
 
 
 def get_checkpoint(training_args: SFTConfig | DPOConfig) -> Path | None:

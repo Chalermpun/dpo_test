@@ -41,7 +41,7 @@ from alignment import (
     get_quantization_config,
     get_tokenizer,
 )
-from trl import SFTTrainer, setup_chat_format
+from trl import SFTTrainer, setup_chat_format, DataCollatorForCompletionOnlyLM
 from tqdm import tqdm
 from rich.pretty import pprint
 
@@ -103,27 +103,28 @@ def main():
     data_args.truncation_side = (
         "left"  # Truncate from left to ensure we don't lose labels in final turn
     )
-    tokenizer = AutoTokenizer.from_pretrained(
-        (
-            model_args.model_name_or_path
-            if model_args.tokenizer_name_or_path is None
-            else model_args.tokenizer_name_or_path
-        ),
-        revision=model_args.model_revision,
-        trust_remote_code=True,
-    )
-    tokenizer.chat_template = data_args.chat_template
+    tokenizer = get_tokenizer(model_args, data_args)
 
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token_id = tokenizer.unk_token_id
-        tokenizer.bos_token_id = tokenizer.unk_token_id
-
-    if data_args.truncation_side is not None:
-        tokenizer.truncation_side = data_args.truncation_side
-
-    # Set reasonable default for models without max length
-    if tokenizer.model_max_length > 100_000:
-        tokenizer.model_max_length = 2048
+    # tokenizer = AutoTokenizer.from_pretrained(
+    #     (
+    #         model_args.model_name_or_path
+    #         if model_args.tokenizer_name_or_path is None
+    #         else model_args.tokenizer_name_or_path
+    #     ),
+    #     revision=model_args.model_revision,
+    #     trust_remote_code=True,
+    # )
+    # tokenizer.chat_template = data_args.chat_template
+    #
+    # if tokenizer.pad_token_id is None:
+    #     tokenizer.pad_token_id = tokenizer.unk_token_id
+    #
+    # if data_args.truncation_side is not None:
+    #     tokenizer.truncation_side = data_args.truncation_side
+    #
+    # # Set reasonable default for models without max length
+    # if tokenizer.model_max_length > 100_000:
+    #     tokenizer.model_max_length = 2048
 
     #######################
     # Load pretrained model
@@ -197,6 +198,20 @@ def main():
                 f"Sample {index} of the processed training set:\n\n{raw_datasets['train'][index]['text']}"
             )
 
+    # instruction_template = "### USER:"
+    response_template = "\n### RESPONSE:\n"
+    response_template_ids = tokenizer.encode(
+        response_template, add_special_tokens=False
+    )[
+        2:
+    ]  # Now we have it like in the dataset texts: `[2277, 29937, 4007, 22137, 29901]`
+    collator = DataCollatorForCompletionOnlyLM(
+        response_template=response_template_ids,
+        tokenizer=tokenizer,
+        mlm=False,
+        ignore_index=-100,
+    )
+
     ########################
     # Initialize the Trainer
     ########################
@@ -212,6 +227,7 @@ def main():
         packing=False,
         peft_config=get_peft_config(model_args),
         dataset_kwargs=training_args.dataset_kwargs,
+        data_collator=collator,
     )
     ###############
     # Training loop
