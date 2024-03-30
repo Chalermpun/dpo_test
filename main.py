@@ -12,11 +12,25 @@ import glob
 import re
 import pandas as pd
 import numpy.random as random
+import random as random_normal
 from typing import List
 import numpy as np
 from tabulate import tabulate
+import os
 
 pd.set_option("display.float_format", None)
+
+
+def deterministic_random(seed: int) -> random_normal.Random:
+    return random_normal.Random(seed)
+
+
+def load_jsonl_datasets(directory):
+    jsonl_files = [file for file in os.listdir(directory) if file.endswith(".jsonl")]
+    data_files = [os.path.join(directory, file) for file in jsonl_files]
+    print(data_files)
+    dataset = load_dataset("json", data_files=data_files)
+    return dataset
 
 
 def scb_translation(example):
@@ -313,7 +327,10 @@ def create_flan_dataset(split="train"):
 
     ### add new dataset by Beer ######
 
-    dataset_wangchanglm = load_dataset("pythainlp/final_training_set_v1", split=split)
+    cache_dir = "/workspace/flan_dataset/cache"
+    dataset_wangchanglm = load_dataset(
+        "pythainlp/final_training_set_v1", split=split, cache_dir=cache_dir
+    )
     dataset_wangchanglm = dataset_wangchanglm.map(
         add_prefix, load_from_cache_file=False
     )
@@ -324,7 +341,9 @@ def create_flan_dataset(split="train"):
         dataset_wangchanglm, "dataset_wangchanglm", "dataset_wangchanglm", "generation"
     )
     print(np.random.choice(dataset_wangchanglm_list, size=3, replace=False))
-    dataset_tiny = load_dataset("nampdn-ai/tiny-codes", split=split).filter(
+    dataset_tiny = load_dataset(
+        "nampdn-ai/tiny-codes", split=split, cache_dir=cache_dir
+    ).filter(
         lambda example: example["programming_language"]
         in ["JavaScript", "Python", "relation database and SQL"]
     )
@@ -334,13 +353,14 @@ def create_flan_dataset(split="train"):
     )
     print(np.random.choice(dataset_tiny_list, size=3, replace=False))
 
-    flan_v2_cot = load_dataset("SirNeural/flan_v2", split=split)
-    flan_v2_cot = flan_v2_cot.filter(
-        lambda example: example["task"] in ["cot", "dialog", "flan"]
-    )
-    print(flan_v2_cot)
-    flan_v2_cot_list = reformat(flan_v2_cot, "flan_v2", "flan_v2_cot", "generation")
-    print(np.random.choice(flan_v2_cot_list, size=3, replace=False))
+    data_dir = "/workspace/sealion/examples/flan_v2/downloads/flan_v2_arrow"
+    flan_v2 = load_from_disk(data_dir)
+    flan = flan_v2["train"].filter(lambda x: x["task"] == "flan", num_proc=8)
+    cot = flan_v2["train"].filter(lambda x: x["task"] == "cot", num_proc=8)
+    random_flan_ids = deterministic_random(42).sample(range(len(flan)), k=100000)
+    flan = flan.select(random_flan_ids)
+    cot_list = reformat(cot, "flan_v2", "cot_v2", "generation")
+    flan_list = reformat(flan, "flan_v2", "flan_v2", "generation")
 
     # flan_v2_dialog = load_dataset("SirNeural/flan_v2", split="train")
     # flan_v2_dialog = flan_v2_dialog.filter(lambda example: example["task"] == "dialog")
@@ -352,7 +372,7 @@ def create_flan_dataset(split="train"):
     # )
 
     alt_dataset = load_dataset(
-        "alt", "alt-parallel", split=split
+        "alt", "alt-parallel", split=split, cache_dir=cache_dir
     )  # .select(range(number_rand))
     alt_dataset = alt_dataset.map(scb_translation, load_from_cache_file=False)
     alt_dataset_list = reformat(
@@ -360,13 +380,25 @@ def create_flan_dataset(split="train"):
     )
 
     ted_talks_iwslt2014 = load_dataset(
-        "ted_talks_iwslt", language_pair=("en", "th"), year="2014", split=split
+        "ted_talks_iwslt",
+        language_pair=("en", "th"),
+        year="2014",
+        split=split,
+        cache_dir=cache_dir,
     )  # .select(range(number_rand))
     ted_talks_iwslt2015 = load_dataset(
-        "ted_talks_iwslt", language_pair=("en", "th"), year="2015", split=split
+        "ted_talks_iwslt",
+        language_pair=("en", "th"),
+        year="2015",
+        split=split,
+        cache_dir=cache_dir,
     )  # .select(range(number_rand))
     ted_talks_iwslt2016 = load_dataset(
-        "ted_talks_iwslt", language_pair=("en", "th"), year="2016", split=split
+        "ted_talks_iwslt",
+        language_pair=("en", "th"),
+        year="2016",
+        split=split,
+        cache_dir=cache_dir,
     )  # .select(range(number_rand))
 
     ted_talks_iwslt2014 = ted_talks_iwslt2014.map(
@@ -388,7 +420,7 @@ def create_flan_dataset(split="train"):
         ted_talks_iwslt2016, "scb_mt_en_th", "ted_talks_iwslt2016", "translation"
     )
     wiki_lingua = load_dataset(
-        "GEM/wiki_lingua", "en_th", split=split
+        "GEM/wiki_lingua", "en_th", split=split, cache_dir=cache_dir
     )  # .select(range(number_rand))
     wiki_lingua = wiki_lingua.map(wiki_lingua_mep, load_from_cache_file=False)
     wiki_lingua_list = reformat(
@@ -397,11 +429,13 @@ def create_flan_dataset(split="train"):
     ### End add new dataset by Beer ######
 
     ################# load dataset from huggingface
-    xlsum = load_dataset("csebuetnlp/xlsum", "thai", split=split)
+    xlsum = load_dataset("csebuetnlp/xlsum", "thai", split=split, cache_dir=cache_dir)
 
-    thaisum = load_dataset("thaisum", split=split)
+    thaisum = load_dataset("thaisum", split=split, cache_dir=cache_dir)
 
-    scb_enth = load_dataset("scb_mt_enth_2020", "enth", split=split)
+    scb_enth = load_dataset(
+        "scb_mt_enth_2020", "enth", split=split, cache_dir=cache_dir
+    )
     scb_enth = scb_enth.map(scb_translation, load_from_cache_file=False)
 
     han = pd.read_excel("/workspace/sealion/examples/han_instruct-v2.xls")
@@ -415,13 +449,17 @@ def create_flan_dataset(split="train"):
     xp3x = xp3x.filter(lambda example: example["config"] in ["thai", "en_th"])
     xp3x = DatasetDict({"train": xp3x})
 
-    platypus = load_dataset("garage-bAInd/Open-Platypus", split=split)
+    platypus = load_dataset(
+        "garage-bAInd/Open-Platypus", split=split, cache_dir=cache_dir
+    )
     platypus = platypus.filter(
         lambda example: example["data_source"] != "scienceqa"
         and example["data_source"] != "reclor"
     )
 
-    wisesight_sentiment = load_dataset("wisesight_sentiment", split=split)
+    wisesight_sentiment = load_dataset(
+        "wisesight_sentiment", split=split, cache_dir=cache_dir
+    )
     wisesight_sentiment = wisesight_sentiment.filter(
         lambda x: x["category"] in [0, 1, 2]
     )
@@ -440,15 +478,21 @@ def create_flan_dataset(split="train"):
     )
     wisesight_sentiment = wisesight_sentiment.rename_columns({"texts": "text"})
 
-    thai_food = load_dataset("pythainlp/thai_food_v1.0", split=split)
+    thai_food = load_dataset(
+        "pythainlp/thai_food_v1.0", split=split, cache_dir=cache_dir
+    )
 
-    thai_wiki_dataset_v3 = load_dataset("pythainlp/thai-wiki-dataset-v3", split=split)
+    thai_wiki_dataset_v3 = load_dataset(
+        "pythainlp/thai-wiki-dataset-v3", split=split, cache_dir=cache_dir
+    )
 
-    klongklon = load_dataset("pythainlp/klongklon", split=split)
+    klongklon = load_dataset("pythainlp/klongklon", split=split, cache_dir=cache_dir)
     klongklon = klongklon.map(context_bot_human, load_from_cache_file=False)
 
     thai_investment_consultant_licensing_exams = load_dataset(
-        "openthaigpt/thai-investment-consultant-licensing-exams", split=split
+        "openthaigpt/thai-investment-consultant-licensing-exams",
+        split=split,
+        cache_dir=cache_dir,
     )
     thai_investment_consultant_licensing_exams = (
         thai_investment_consultant_licensing_exams.filter(
@@ -469,9 +513,11 @@ def create_flan_dataset(split="train"):
         )
     )
 
-    thai_usembassy = load_dataset("pythainlp/thai_usembassy", split=split)
+    thai_usembassy = load_dataset(
+        "pythainlp/thai_usembassy", split=split, cache_dir=cache_dir
+    )
 
-    wongnai_reviews = load_dataset("wongnai_reviews", split=split)
+    wongnai_reviews = load_dataset("wongnai_reviews", split=split, cache_dir=cache_dir)
     wongnai_reviews = wongnai_reviews.map(
         wongnai_reviews_sentiment,
         fn_kwargs={
@@ -524,15 +570,23 @@ def create_flan_dataset(split="train"):
         data_files="https://github.com/wannaphong/thai-english-transliteration-dictionary/raw/main/dict.tsv",
         split=split,
         sep="\t",
+        cache_dir=cache_dir,
     )
 
-    prd_news_30112023 = load_dataset("pythainlp/prd_news_30112023", split=split)
+    prd_news_30112023 = load_dataset(
+        "pythainlp/prd_news_30112023", split=split, cache_dir=cache_dir
+    )
 
-    aya_dataset = load_dataset("CohereForAI/aya_collection", "aya_dataset", split=split)
+    aya_dataset = load_dataset(
+        "CohereForAI/aya_collection", "aya_dataset", split=split, cache_dir=cache_dir
+    )
     aya_dataset = aya_dataset.filter(lambda example: example["language"] == "tha")
 
     aya_collection_templated_xlel_wd = load_dataset(
-        "CohereForAI/aya_collection", "templated_xlel_wd", split=split
+        "CohereForAI/aya_collection",
+        "templated_xlel_wd",
+        split=split,
+        cache_dir=cache_dir,
     )
 
     aya_collection_templated_xlel_wd = aya_collection_templated_xlel_wd.filter(
@@ -655,7 +709,8 @@ def create_flan_dataset(split="train"):
         + wiki_lingua_list
         + dataset_wangchanglm_list
         + dataset_tiny_list
-        + flan_v2_cot_list
+        + flan_list
+        + cot_list
     )
     return flan_list
 
@@ -664,7 +719,8 @@ def add_new_dataset(dataset1, dataset2, splits=["train", "train_sft"]):
     dataset1 = dataset1[splits[0]].select_columns(["messages", "prompt"])
     dataset2 = dataset2[splits[1]].select_columns(["messages", "prompt"])
     new_dataset = concatenate_datasets([dataset1, dataset2])
-    return new_dataset
+    dataset = DatasetDict({"train": new_dataset})
+    return dataset
 
 
 def update_metadata(metadata1, metadata2):
@@ -690,19 +746,20 @@ def save_metadata(metadata, path):
     metadata_df = pd.DataFrame.from_dict(metadata, orient="index")
     metadata_df = metadata_df.reset_index()
     metadata_df.columns = ["name", "rows"]
-    row_sum = metadata_df.sum(axis=1)
+    total = metadata_df["rows"].sum()
+    metadata_df["name"] = metadata_df["name"].apply(
+        lambda x: x if isinstance(x, str) else x[0]
+    )
     max_string = metadata_df["name"].str.len().max()
     half_string_max = max_string // 2
     half_string_max = "=" * half_string_max
     string_total = half_string_max + " total " + half_string_max
-    total = int(row_sum.sum())
-    metadata_df = metadata_df.append(
+    metadata_df = metadata_df._append(
         {"name": string_total, "rows": total}, ignore_index=True
     )
     print(tabulate(metadata_df, headers="keys", tablefmt="psql"))
     with open(path, "w") as f:
-        metadata.update({"aggregate": {"total": total}})
-        json.dump(metadata, f)
+        f.write(tabulate(metadata_df, headers="keys", tablefmt="psql"))
 
 
 if __name__ == "__main__":
@@ -716,7 +773,7 @@ if __name__ == "__main__":
     metadata_ultrachat = create_metadata(ultrachat, "train_sft")
     metadata_flan = create_metadata(flan_dataset_dict, "train")
     metadata = update_metadata(metadata_ultrachat, metadata_flan)
-    save_metadata(metadata, "./metadata/metadata.json")
 
     raw_datasets = add_new_dataset(flan_dataset_dict, ultrachat)
-    raw_datasets.save_to_disk("/workspace/flan_dataset/flan_v1")
+    raw_datasets.save_to_disk("/root/flan_dataset/flan_v1")
+    save_metadata(metadata, "./metadata/metadata_v1.txt")

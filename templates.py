@@ -154,7 +154,7 @@ PATTERNS = {
             "output": "{summary}",
         },
         {
-            "instruction": "สร้างตัวอย่างดาต้าการสรุปบทความ โดยประกอบด้วย Context และ Summary โดยSsummary คือสรุปที่มาจาก Context",
+            "instruction": "สร้างตัวอย่างดาต้าการสรุปบทความ โดยประกอบด้วย Context และ Summary โดย Summary คือสรุปที่มาจาก Context",
             "input": "",
             "output": "Context: {body}\n\nSummary: {summary}",
         },
