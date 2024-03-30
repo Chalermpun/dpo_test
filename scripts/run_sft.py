@@ -24,7 +24,7 @@ import sys
 import datasets
 import torch
 import transformers
-from transformers import AutoModelForCausalLM, set_seed, AutoTokenizer
+from transformers import AutoModelForCausalLM, set_seed, AutoTokenizer, AutoConfig
 
 from numpy import percentile
 from alignment import (
@@ -105,27 +105,6 @@ def main():
     )
     tokenizer = get_tokenizer(model_args, data_args)
 
-    # tokenizer = AutoTokenizer.from_pretrained(
-    #     (
-    #         model_args.model_name_or_path
-    #         if model_args.tokenizer_name_or_path is None
-    #         else model_args.tokenizer_name_or_path
-    #     ),
-    #     revision=model_args.model_revision,
-    #     trust_remote_code=True,
-    # )
-    # tokenizer.chat_template = data_args.chat_template
-    #
-    # if tokenizer.pad_token_id is None:
-    #     tokenizer.pad_token_id = tokenizer.unk_token_id
-    #
-    # if data_args.truncation_side is not None:
-    #     tokenizer.truncation_side = data_args.truncation_side
-    #
-    # # Set reasonable default for models without max length
-    # if tokenizer.model_max_length > 100_000:
-    #     tokenizer.model_max_length = 2048
-
     #######################
     # Load pretrained model
     #######################
@@ -136,6 +115,19 @@ def main():
         else getattr(torch, model_args.torch_dtype)
     )
     quantization_config = get_quantization_config(model_args)
+
+    config = AutoConfig.from_pretrained(
+        model_args.model_name_or_path,
+        trust_remote_code=True,
+    )
+
+    config.attn_config["attn_impl"] = "flash"
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_args.model_name_or_path,
+        config=config,
+        trust_remote_code=True,
+    )
 
     model_kwargs = dict(
         revision=model_args.model_revision,
@@ -180,7 +172,8 @@ def main():
     # filter datasets to remove samples that are too long
     before = len(raw_datasets["train"])
     raw_datasets = raw_datasets.filter(
-        lambda x: len(tokenizer(x["text"])["input_ids"]) <= tokenizer.model_max_length
+        lambda x: len(tokenizer(x["text"], add_special_tokens=False)["input_ids"])
+        <= tokenizer.model_max_length,
     )
 
     pprint(f"len(raw_datasets['train']) before: {before}")
@@ -198,19 +191,35 @@ def main():
                 f"Sample {index} of the processed training set:\n\n{raw_datasets['train'][index]['text']}"
             )
 
-    # instruction_template = "### USER:"
-    response_template = "\n### RESPONSE:\n"
-    response_template_ids = tokenizer.encode(
-        response_template, add_special_tokens=False
-    )[
-        2:
-    ]  # Now we have it like in the dataset texts: `[2277, 29937, 4007, 22137, 29901]`
-    collator = DataCollatorForCompletionOnlyLM(
-        response_template=response_template_ids,
-        tokenizer=tokenizer,
-        mlm=False,
-        ignore_index=-100,
-    )
+    # instruction_template = "### USER:\n"
+    # response_template = "\n### RESPONSE:\n"
+    # response_template_ids = tokenizer.encode(
+    #     response_template, add_special_tokens=False
+    # )[
+    #     2:
+    # ]  # Now we have it like in the dataset texts: `[2277, 29937, 4007, 22137, 29901]`
+    # collator = DataCollatorForCompletionOnlyLM(
+    #     response_template=response_template_ids,
+    #     instruction_template=instruction_template,
+    #     tokenizer=tokenizer,
+    #     mlm=False,
+    #     ignore_index=-100,
+    # )
+
+    # sentences = [
+    #     {"role": "user", "content": "เมืองหลวงของไทยคือที่ไหน"},
+    #     {"role": "assistant", "content": "กรุงเทพ"},
+    # ]
+    #
+    # tokenized_sentences = tokenizer.apply_chat_template(
+    #     sentences, tokenize=False, add_generation_prompt=False
+    # )
+    #
+    # tokenized_sentences = [tokenizer(tokenized_sentences)]
+    # batch = collator(tokenized_sentences)
+    # pprint(tokenizer.convert_ids_to_tokens(tokenized_sentences[0]["input_ids"]))
+    # pprint(tokenized_sentences)
+    # pprint(batch)
 
     ########################
     # Initialize the Trainer
@@ -227,7 +236,7 @@ def main():
         packing=False,
         peft_config=get_peft_config(model_args),
         dataset_kwargs=training_args.dataset_kwargs,
-        data_collator=collator,
+        # data_collator=collator,
     )
     ###############
     # Training loop

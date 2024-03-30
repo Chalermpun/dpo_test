@@ -9,17 +9,16 @@ trust_remote_code: true
 # Data training arguments
 chat_template: "{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '### USER:\n' + message['content'] }}\n\n{% elif message['role'] == 'assistant' %}\n{{ '### RESPONSE:\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '### RESPONSE:' }}\n{% endif %}\n{% endfor %}"
 dataset_mixer:
-  /workspace/flan_dataset/flan: 0.0001 # size of dataset (fraction of full dataset)
+  /workspace/flan_dataset/flan_v1: 1 # size of dataset (fraction of full dataset
 dataset_splits:
   - train
 preprocessing_num_workers: 8
-auto_insert_empty_system_msg: true
 
 # SFT trainer config
 bf16: true
 do_eval: false
 # evaluation_strategy: epoch
-gradient_accumulation_steps: 1
+gradient_accumulation_steps: 5
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: False
@@ -30,7 +29,7 @@ logging_strategy: steps
 lr_scheduler_type: cosine
 max_seq_length: 2048
 max_steps: -1
-num_train_epochs: 1
+num_train_epochs: 2
 output_dir: /workspace/alignment-handbook_old/data/sealion-7b-sft-full-v1
 overwrite_output_dir: true
 per_device_eval_batch_size: 5
@@ -39,8 +38,8 @@ push_to_hub: false
 remove_unused_columns: true
 report_to:
   - wandb
-save_strategy: "steps"
-save_steps: 1000
+save_strategy: "epoch"
+# save_steps: 1000
 # save_total_limit: 1
 seed: 42
 warmup_ratio: 0.1
