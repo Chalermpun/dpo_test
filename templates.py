@@ -968,7 +968,7 @@ PATTERNS = {
             "output": "{response}",
         },
         {
-            "instruction": "เขียนโค้ด {prompt}",
+            "instruction": "เขียนโค้ดตามคำสั่งต่อไปนี้ {prompt}",
             "input": "",
             "output": "{response}",
         },
