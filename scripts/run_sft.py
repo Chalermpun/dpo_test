@@ -160,20 +160,22 @@ def main():
     ##########################
     # Decontaminate benchmarks
     ##########################
-    num_raw_train_samples = len(raw_datasets["train"])
-    raw_datasets = raw_datasets.filter(
-        decontaminate_humaneval, batched=True, batch_size=10_000, num_proc=1
-    )
-    num_filtered_train_samples = num_raw_train_samples - len(raw_datasets["train"])
-    logger.info(
-        f"Decontaminated {num_filtered_train_samples} ({num_filtered_train_samples/num_raw_train_samples * 100:.2f}%) samples from the training set."
-    )
+    # num_raw_train_samples = len(raw_datasets["train"])
+    # raw_datasets = raw_datasets.filter(
+    #     decontaminate_humaneval, batched=True, batch_size=10_000, num_proc=1
+    # )
+    # num_filtered_train_samples = num_raw_train_samples - len(raw_datasets["train"])
+    # logger.info(
+    #     f"Decontaminated {num_filtered_train_samples} ({num_filtered_train_samples/num_raw_train_samples * 100:.2f}%) samples from the training set."
+    # )
 
     # filter datasets to remove samples that are too long
     before = len(raw_datasets["train"])
+    pprint(raw_datasets)
     raw_datasets = raw_datasets.filter(
         lambda x: len(tokenizer(x["text"], add_special_tokens=False)["input_ids"])
         <= tokenizer.model_max_length,
+        num_proc=8,
     )
 
     pprint(f"len(raw_datasets['train']) before: {before}")
