@@ -56,3 +56,5 @@ res = tokenizer.apply_chat_template(raw_datasets['train'][222]['messages'])
 tokenizer.decode(res)
 
 print(tokenizer.chat_template)
+from datasets import load_from_disk
+dataset = load_from_disk("/root/flan_dataset/flan_v1")
