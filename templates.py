@@ -88,6 +88,11 @@ PATTERNS = {
             "input": "",
             "output": "{text}",
         },
+        {
+            "instruction": "Generate summarization example in Thai.",
+            "input": "",
+            "output": "Content: {text}\n\nSummary: {summary}",
+        },
     ],
     "thaisum": [
         {"instruction": "จงเขียนสรุปข่าวต่อไปนี้", "input": "{body}", "output": "{summary}"},
@@ -300,6 +305,11 @@ PATTERNS = {
             "input": "",
             "output": "{en}",
         },
+        {
+            "instruction": "Generate machine translation example : a pair of Thai and English.",
+            "input": "",
+            "output": "Thai: {th}\nEnglish: {en}",
+        },
     ],
     "han": [
         {
@@ -422,7 +432,7 @@ PATTERNS = {
             "output": "{answer}",
         },
         {
-            "instruction": "ความรู้สึกต่อความเห็นหรือโพสบนโลกออนไลน์นี้เป็นความรู้สึก {pos} {neg} หรือ {neu}",
+            "instruction": "ความรู้สึกต่อความเห็นหรือโพสบนโลกออนไลน์นี้เป็นความรู้สึก\nChoice: {pos} {neg} หรือ {neu}",
             "input": "{text}",
             "output": "{answer}",
         },
@@ -460,6 +470,11 @@ PATTERNS = {
             "instruction": "จงเขียนข้อความในสื่อสังคมออนไลน์ที่มีความรู้สึก {answer}",
             "input": "",
             "output": "{text}",
+        },
+        {
+            "instruction": "Generate sentiment classification example including sentence and sentiment of the sentence in Thai.",
+            "input": "",
+            "output": "Sentence: {text}\nSentiment: {answer}",
         },
     ],
     "thai_food": [  # add tp
@@ -503,6 +518,11 @@ PATTERNS = {
             "input": "",
             "output": "{text}",
         },
+        {
+            "instruction": "กินอะไรดี วันนี้",
+            "input": "",
+            "output": "กินอันนี้ดีไหม?\nชื่ออาหาร (Name): {name}\n\nวิธีการทำ (Recipe): {text}",
+        },
     ],
     "thai_wiki_dataset_v3": [  # เพิ่ม tp to 10
         {
@@ -521,12 +541,12 @@ PATTERNS = {
             "output": "{text}",
         },
         {
-            "instruction": "What you know about {title}",
+            "instruction": "What you know about {title}.",
             "input": "",
             "output": "{text}",
         },
         {
-            "instruction": "Question: What is definition of {title}",
+            "instruction": "Question: What is meaning of {title}.",
             "input": "",
             "output": "{text}",
         },
@@ -536,7 +556,7 @@ PATTERNS = {
             "output": "{text}",
         },
         {
-            "instruction": "generate some topic and definition",
+            "instruction": "Generate some Title and Definition example.",
             "input": "",
             "output": "Title: {title}\nDefinition: {text}",
         },
@@ -568,7 +588,7 @@ PATTERNS = {
             "output": "{context} {bot}",
         },
         {
-            "instruction": "ส่วนที่หายไปของกลอนแปดคืออะไร",
+            "instruction": "Question: ส่วนที่หายไปของกลอนแปดคืออะไร",
             "input": "___ {bot}",
             "output": "{context}",
         },
@@ -617,12 +637,12 @@ PATTERNS = {
             "output": "{th}",
         },
         {
-            "instruction": "Translate the following sentence or paragraph from English to Thai",
+            "instruction": "Translate the following sentence or paragraph from English to Thai.",
             "input": "{en}",
             "output": "{th}",
         },
         {
-            "instruction": "Translate the following sentence or paragraph from Thai to English",
+            "instruction": "Translate the following sentence or paragraph from Thai to English.",
             "input": "{th}",
             "output": "{en}",
         },
@@ -637,22 +657,17 @@ PATTERNS = {
             "output": "{title_th}",
         },
         {
-            "instruction": "From the following paragrap, What is the topic about?",
+            "instruction": "From the following paragraph, What is the topic about?",
             "input": "{th}",
             "output": "{title_th}",
         },
         {
-            "instruction": "generate machine translation dataset from Thai to English",
+            "instruction": "Generate machine translation dataset example from Thai to English.",
             "input": "",
             "output": "Thai: {th}\nEnglish: {en}",
         },
         {
-            "instruction": "generate machine translation dataset from Thai to English",
-            "input": "",
-            "output": "Thai: {th}\nEnglish: {en}",
-        },
-        {
-            "instruction": "สร้างข้อมูล การแปลภาษา จากอังกฤษเป็นไทย",
+            "instruction": "สร้างข้อมูล การแปลภาษา  โดยจะต้องเป็นคู่แปลของสองภาษา อังกฤษและไทย",
             "input": "",
             "output": "Thai: {th}\nEnglish: {en}",
         },
@@ -669,7 +684,7 @@ PATTERNS = {
             "output": "{review_body}",
         },
         {
-            "instruction": "จงเขียนตัวอย่างข้อความรีวิวร้านอาหารในเชิง{sentiment_th}",
+            "instruction": "จงเขียนตัวอย่างข้อความรีวิวร้านอาหารในเชิง {sentiment_th}",
             "input": "",
             "output": "{review_body}",
         },
@@ -689,7 +704,7 @@ PATTERNS = {
             "output": "{sentiment_th}",
         },
         {
-            "instruction": "ความรู้สึกของความคิดเห็นต่อไปนี้เป็นตวามรู้สึก {pos} {neg} หรือ {neu}",
+            "instruction": "ความรู้สึกของความคิดเห็นต่อไปนี้เป็นตวามรู้สึก {pos}, {neg}, หรือ {neu}",
             "input": "{review_body}",
             "output": "{sentiment_th}",
         },
@@ -699,7 +714,7 @@ PATTERNS = {
             "output": "{sentiment_th}",
         },
         {
-            "instruction": "ความเห็นนี้เป็นอย่างไร\nตัวเลือกคือ: {pos} {neg} หรือ {neu}",
+            "instruction": "ความเห็นนี้เป็นอย่างไร\nChoice: {pos}, {neg}, หรือ {neu}",
             "input": "{review_body}",
             "output": "{sentiment_th}",
         },
@@ -718,6 +733,11 @@ PATTERNS = {
             "input": "{review_body}",
             "output": "{sentiment_th}",
         },
+        {
+            "instruction": "Generate sentiment classification example including sentence and sentiment of sentence in Thai.",
+            "input": "",
+            "output": "Sentence: {review_body}\nSentiment: {sentiment_th}",
+        },
     ],
     "thai_sentiment_analysis_dataset": [
         {
@@ -726,7 +746,7 @@ PATTERNS = {
             "output": "{answer_th}",
         },
         {
-            "instruction": "ข้อความต่อไปนี้เป็นความรู้สึก {pos} {neg} หรือ {neu}",
+            "instruction": "ข้อความต่อไปนี้เป็นความรู้สึก {pos}, {neg}, หรือ {neu}",
             "input": "{text}",
             "output": "{answer_th}",
         },
@@ -761,9 +781,9 @@ PATTERNS = {
             "output": "{answer_th}",
         },
         {
-            "instruction": "จงเขียนตัวอย่างของข้อความในสื่อสังคมออนไลน์",
+            "instruction": "จงเขียนตัวอย่างของข้อความในสื่อสังคมออนไลน์ พร้อมทั้งบอกความรู้สึก",
             "input": "",
-            "output": "{text}",
+            "output": "ข้อความ: {text}\nความรู้สึก: {answer_th}",
         },
         {
             "instruction": "Classify sentiment class for this sentence : {text}",
@@ -771,14 +791,19 @@ PATTERNS = {
             "output": "{answer_th}",
         },
         {
-            "instruction": "จงเขียนข้อความในสื่อสังคมออนไลน์ที่มีความรู้สึก{answer_th}",
+            "instruction": "จงเขียนข้อความในสื่อสังคมออนไลน์ที่มีความรู้สึก {answer_th}",
             "input": "",
             "output": "{text}",
+        },
+        {
+            "instruction": "Generate sentiment classification example including sentence and sentiment of sentence in Thai.",
+            "input": "",
+            "output": "Sentence: {text}\nSentiment: {answer_th}",
         },
     ],
     "thai_english_transliteration_dictionary": [  # add tp
         {
-            "instruction": "You are an expert transliterator with fluency in English and Thai languages. Transliterate the given word from English to Thai",
+            "instruction": "You are an expert transliterator with fluency in English and Thai languages. Transliterate the given word from English to Thai.",
             "input": "{en}",
             "output": "{th}",
         },
@@ -788,12 +813,12 @@ PATTERNS = {
             "output": "{th}",
         },
         {
-            "instruction": "ถอดอักษรคำที่กำหนดจากภาษาอังกฤษเป็นภาษาไทย",
+            "instruction": "ถอดอักษรคำ คำทับศัพท์ ที่กำหนดจากภาษาอังกฤษเป็นภาษาไทย",
             "input": "{en}",
             "output": "{th}",
         },
         {
-            "instruction": "คุณเป็นผู้เชี่ยวชาญด้านการถอดอักษรที่มีความชำนาญในภาษาอังกฤษและภาษาไทย โปรดถอดอักษรจากคำที่กำหนดจากภาษาอังกฤษเป็นภาษาไทย",
+            "instruction": "คุณเป็นผู้เชี่ยวชาญด้านการถอดอักษร คำทับศัพท์ ที่มีความชำนาญในภาษาอังกฤษและภาษาไทย โปรดถอดอักษรจากคำที่กำหนดจากภาษาอังกฤษเป็นภาษาไทย",
             "input": "{en}",
             "output": "{th}",
         },
@@ -856,7 +881,7 @@ PATTERNS = {
         },
         {
             "instruction": "เขียนข่าวที่เกี่ยวข้องกับ Keysword ต่อไปนี้",
-            "input": "Keysword: {Region} {Province} {Department}",
+            "input": "Keysword: {Region}, {Province}, {Department}",
             "output": "{Detail}",
         },
         {
@@ -865,7 +890,7 @@ PATTERNS = {
             "output": "{Detail}",
         },
         {
-            "instruction": "Question (คำถาม): เนื้อหาข่าวที่ ควรจะเป็นและ สัมพันธ์กับ Background ต่อไปนี้คืออะไร",
+            "instruction": "Question (คำถาม): เนื้อหาข่าวที่ควรจะเป็น โดยอ้างอิงจาก Background ต่อไปนี้คืออะไร",
             "input": "Background (พื้นหลัง): {NewsTitle}",
             "output": "{Detail}",
         },
@@ -906,14 +931,14 @@ PATTERNS = {
             "output": "{target}",
         },
         {
-            "instruction": "สร้างเนื้อหาข่าวฉบับเต็ม จากสรุปที่ให้ไป โดยสรุปที่จะให้ต่อไปนี้เป็นภาษา {target_lang} แต่เนื้อหาข่าวฉบับเต็มจะต้องเป็นภาษา {source_lang}",
-            "input": "{target}",
-            "output": "{source}",
+            "instruction": "สร้างเนื้อหาฉบับเต็ม โดยอ้างอิงจากสรุปที่จะให้ต่อไปนี้ โดยสรุปที่จะให้เป็นภาษา {target_lang} แต่เนื้อหาข่าวฉบับเต็มจะต้องออกมาเป็นภาษา {source_lang}",
+            "input": "สรุป ({target_lang}): {target}",
+            "output": "เนื้อหา ({source_lang}): {source}",
         },
         {
-            "instruction": "สร้างเนื้อหาเริ่มต้นในภาษา {source_lang} โดยมีเนื้อหาสรุปอ้างอิงเป็น {target_lang} คือ: '{target}'",
+            "instruction": "เขียนเนื้อหาในภาษา {source_lang} โดยให้จิตนาการว่า ถ้ามีเนื้อหาสรุปอ้างอิงเป็น {target_lang} แล้วเนื้อหาก่อนที่จะสรุปเป็นแบบไหน และนี่คือสรุป : '{target}'",
             "input": "",
-            "output": "{source}",
+            "output": "เนื้อหาในภาษา {source_lang} ที่ควรจะเป็นคือ:  {source}",
         },
         {
             "instruction": "Instruction: Please summarize context in {target_lang}.",
@@ -931,12 +956,12 @@ PATTERNS = {
             "output": "{target}",
         },
         {
-            "instruction": "Try to generate a summary from the given context from {source_lang} to {target_lang}",
-            "input": "Context: {source}",
-            "output": "{target}",
+            "instruction": "Try to generate cross lingual summarization examples. The given context is in {source_lang} and summary should be in {target_lang}",
+            "input": "",
+            "output": "Context ({source_lang}): {source}\n\nSummary ({target_lang}): {target}",
         },
         {
-            "instruction": "Question: from news context in {source_lang}, What is an easy-to-understand summary of the content in {target_lang}?",
+            "instruction": "Question: from the context in {source_lang}, What is an easy-to-understand summary of the content in {target_lang}?",
             "input": "Context: {source}",
             "output": "{target}",
         },
@@ -951,12 +976,12 @@ PATTERNS = {
             "output": "{target}",
         },
         {
-            "instruction": "Construct a pair of cross lingual summarization task. Content should be in {source_lang} and Summary should be in {target_lang}.",
+            "instruction": "Construct a pair of cross lingual summarization task example. Content should be in {source_lang} and Summary should be in {target_lang}.",
             "input": "",
             "output": "Content: {source}\n\nSummary: {target}",
         },
         {
-            "instruction": "Summary: {target}\n\nQuestion: can you generate a full content from this summary in {source_lang}?",
+            "instruction": "Summary: {target}\n\nQuestion: Can you generate a full content from the summary in {source_lang}?",
             "input": "",
             "output": "{source}",
         },
@@ -968,7 +993,7 @@ PATTERNS = {
             "output": "{response}",
         },
         {
-            "instruction": "เขียนโค้ดตามคำสั่งต่อไปนี้ {prompt}",
+            "instruction": "เขียนโค้ดตามคำสั่งต่อไปนี้\n{prompt}",
             "input": "",
             "output": "{response}",
         },
@@ -991,5 +1016,29 @@ PATTERNS = {
             "input": "",
             "output": "{Answer}",
         }
+    ],
+    "math_50k": [
+        {
+            "instruction": "{instruction}",
+            "input": "{input}",
+            "output": "{output}",
+        },
+        {
+            "instruction": "Instruction: {instruction}",
+            "input": "{input}",
+            "output": "{output}",
+        },
+    ],
+    "commonsense_170k": [
+        {
+            "instruction": "{instruction}",
+            "input": "{input}",
+            "output": "{output}",
+        },
+        {
+            "instruction": "Instruction: {instruction}",
+            "input": "{input}",
+            "output": "{output}",
+        },
     ],
 }

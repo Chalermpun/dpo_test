@@ -41,7 +41,7 @@ def scb_translation(example):
 
 def read_file_xp3x():
 
-    path = "/workspace/sealion/examples/xp3x/content/drive/MyDrive/xp3/*"
+    path = "/workspace/sealion_old/examples/xp3x/content/drive/MyDrive/xp3/*"
     all_file = []
     j = 0
     for file in glob.glob(path):
@@ -328,6 +328,20 @@ def create_flan_dataset(split="train"):
     ### add new dataset by Beer ######
 
     cache_dir = "/workspace/flan_dataset/cache"
+
+    math_50k = pd.read_json('https://github.com/AGI-Edgerunners/LLM-Adapters/raw/main/ft-training_set/math_50k.json')
+    math_50k = Dataset.from_pandas(math_50k)
+    commonsense_170k = pd.read_json('https://github.com/AGI-Edgerunners/LLM-Adapters/raw/main/ft-training_set/commonsense_170k.json')
+    commonsense_170k = Dataset.from_pandas(commonsense_170k)
+
+    math_50k_list = reformat(math_50k, "math_50k", "math_50k", "text-generation")
+
+    print(np.random.choice(math_50k_list, size=3, replace=False))
+    commonsense_170k_list = reformat(
+        commonsense_170k, "commonsense_170k", "commonsense_170k", "text-generation"
+    )
+
+    print(np.random.choice(commonsense_170k_list, size=3, replace=False))
     dataset_wangchanglm = load_dataset(
         "pythainlp/final_training_set_v1", split=split, cache_dir=cache_dir
     )
@@ -353,7 +367,7 @@ def create_flan_dataset(split="train"):
     )
     print(np.random.choice(dataset_tiny_list, size=3, replace=False))
 
-    data_dir = "/workspace/sealion/examples/flan_v2/downloads/flan_v2_arrow"
+    data_dir = "/workspace/sealion_old/examples/flan_v2/downloads/flan_v2_arrow"
     flan_v2 = load_from_disk(data_dir)
     flan = flan_v2["train"].filter(lambda x: x["task"] == "flan", num_proc=8)
     cot = flan_v2["train"].filter(lambda x: x["task"] == "cot", num_proc=8)
@@ -438,7 +452,7 @@ def create_flan_dataset(split="train"):
     )
     scb_enth = scb_enth.map(scb_translation, load_from_cache_file=False)
 
-    han = pd.read_excel("/workspace/sealion/examples/han_instruct-v2.xls")
+    han = pd.read_excel("/workspace/sealion_old/examples/han_instruct-v2.xls")
     han = Dataset.from_pandas(han)
     han_dataset = DatasetDict()
     han_dataset["train"] = han
@@ -506,12 +520,12 @@ def create_flan_dataset(split="train"):
         )
     )
 
-    thai_investment_consultant_licensing_exams = (
-        thai_investment_consultant_licensing_exams.map(
-            thai_investment_consultant_licensing_exams_answer,
-            load_from_cache_file=False,
-        )
-    )
+    # thai_investment_consultant_licensing_exams = (
+    #     thai_investment_consultant_licensing_exams.map(
+    #         thai_investment_consultant_licensing_exams_answer,
+    #         load_from_cache_file=False,
+    #     )
+    # )
 
     thai_usembassy = load_dataset(
         "pythainlp/thai_usembassy", split=split, cache_dir=cache_dir
@@ -632,12 +646,12 @@ def create_flan_dataset(split="train"):
         klongklon, "klongklon", "pythainlp/klongklon", "text-generation"
     )
 
-    thai_investment_consultant_licensing_exams_list = reformat(
-        thai_investment_consultant_licensing_exams,
-        "thai_investment_consultant_licensing_exams",
-        "openthaigpt/thai-investment-consultant-licensing-exams",
-        "question-answering",
-    )
+    # thai_investment_consultant_licensing_exams_list = reformat(
+    #     thai_investment_consultant_licensing_exams,
+    #     "thai_investment_consultant_licensing_exams",
+    #     "openthaigpt/thai-investment-consultant-licensing-exams",
+    #     "question-answering",
+    # )
 
     thai_usembassy_list = reformat(
         thai_usembassy, "thai_usembassy", "pythainlp/thai_usembassy", "translation"
@@ -694,7 +708,7 @@ def create_flan_dataset(split="train"):
         + thai_food_list
         + thai_wiki_dataset_v3_list
         + klongklon_list
-        + thai_investment_consultant_licensing_exams_list
+        # + thai_investment_consultant_licensing_exams_list
         + thai_usembassy_list
         + wongnai_reviews_list
         + thai_sentiment_analysis_dataset_list
@@ -711,6 +725,8 @@ def create_flan_dataset(split="train"):
         + dataset_tiny_list
         + flan_list
         + cot_list
+        + math_50k_list
+        + commonsense_170k_list
     )
     return flan_list
 
@@ -775,5 +791,5 @@ if __name__ == "__main__":
     metadata = update_metadata(metadata_ultrachat, metadata_flan)
 
     raw_datasets = add_new_dataset(flan_dataset_dict, ultrachat)
-    raw_datasets.save_to_disk("/root/flan_dataset/flan_v1")
-    save_metadata(metadata, "./metadata/metadata_v1.txt")
+    raw_datasets.save_to_disk("/root/flan_dataset/flan_v2")
+    save_metadata(metadata, "./metadata/metadata_v2.txt")
