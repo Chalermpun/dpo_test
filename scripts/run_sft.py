@@ -181,9 +181,13 @@ def main():
     pprint(f"len(raw_datasets['train']) before: {before}")
     pprint(f"len(raw_datasets['train']) after: {len(raw_datasets['train'])}")
 
+    raw_datasets = raw_datasets["train"].train_test_split(
+        test_size=0.0005, seed=training_args.seed
+    )
     train_dataset = raw_datasets["train"]
-    eval_dataset = datasets.Dataset.from_dict(raw_datasets["train"][0])
-    # eval_dataset = raw_datasets["test"]
+    eval_dataset = raw_datasets["test"]
+
+    # eval_dataset = datasets.Dataset.from_dict(raw_datasets["train"][0])
 
     with training_args.main_process_first(
         desc="Log a few random samples from the processed training set"
