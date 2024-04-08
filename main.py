@@ -329,9 +329,13 @@ def create_flan_dataset(split="train"):
 
     cache_dir = "/workspace/flan_dataset/cache"
 
-    math_50k = pd.read_json('https://github.com/AGI-Edgerunners/LLM-Adapters/raw/main/ft-training_set/math_50k.json')
+    math_50k = pd.read_json(
+        "https://github.com/AGI-Edgerunners/LLM-Adapters/raw/main/ft-training_set/math_50k.json"
+    )
     math_50k = Dataset.from_pandas(math_50k)
-    commonsense_170k = pd.read_json('https://github.com/AGI-Edgerunners/LLM-Adapters/raw/main/ft-training_set/commonsense_170k.json')
+    commonsense_170k = pd.read_json(
+        "https://github.com/AGI-Edgerunners/LLM-Adapters/raw/main/ft-training_set/commonsense_170k.json"
+    )
     commonsense_170k = Dataset.from_pandas(commonsense_170k)
 
     math_50k_list = reformat(math_50k, "math_50k", "math_50k", "text-generation")
