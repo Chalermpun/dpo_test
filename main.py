@@ -795,5 +795,12 @@ if __name__ == "__main__":
     metadata = update_metadata(metadata_ultrachat, metadata_flan)
 
     raw_datasets = add_new_dataset(flan_dataset_dict, ultrachat)
+    raw_datasets.set_format(type="pandas")
+    raw_dataset_train = raw_datasets["train"][:]
+    raw_dataset_train = raw_dataset_train.apply(
+        lambda x: x.astype(str).str.lower()
+    ).drop_duplicates(subset=["messages"], keep="first")
+    raw_dataset_train = Dataset.from_pandas(raw_dataset_train)
+    raw_datasets = DatasetDict({"train": raw_dataset_train})
     raw_datasets.save_to_disk("/root/flan_dataset/flan_v2")
     save_metadata(metadata, "./metadata/metadata_v2.txt")
