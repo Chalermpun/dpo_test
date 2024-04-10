@@ -17,8 +17,19 @@ from typing import List
 import numpy as np
 from tabulate import tabulate
 import os
+from transformers import AutoTokenizer
+from typing import Literal
 
 pd.set_option("display.float_format", None)
+
+chat_template = "{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '### USER:\n' + message['content'] }}\n\n{% elif message['role'] == 'assistant' %}\n{{ '### RESPONSE:\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '### RESPONSE:' }}\n{% endif %}\n{% endfor %}"
+
+tokenizer = AutoTokenizer.from_pretrained(
+    "/workspace/sandbox/model_sealion7b", trust_remote_code=True
+)
+tokenizer.pad_token_id = 0
+tokenizer.padding_side = "right"
+tokenizer.chat_template = chat_template
 
 
 def deterministic_random(seed: int) -> random_normal.Random:
@@ -783,6 +794,25 @@ def save_metadata(metadata, path):
         f.write(tabulate(metadata_df, headers="keys", tablefmt="psql"))
 
 
+def apply_chat_template(
+    example,
+    tokenizer,
+    task: Literal["sft", "generation", "rm", "dpo"],
+):
+    if task in ["sft", "generation"]:
+        messages = example["messages"]
+        example["text"] = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True if task == "generation" else False,
+        )
+    else:
+        raise ValueError(
+            f"Task {task} not supported, please ensure that the provided task is one of {['sft', 'generation', 'rm', 'dpo']}"
+        )
+    return example
+
+
 if __name__ == "__main__":
 
     flan_list = create_flan_dataset()
@@ -796,10 +826,19 @@ if __name__ == "__main__":
     metadata = update_metadata(metadata_ultrachat, metadata_flan)
 
     raw_datasets = add_new_dataset(flan_dataset_dict, ultrachat)
+    raw_datasets = raw_datasets.map(
+        apply_chat_template,
+        fn_kwargs={
+            "tokenizer": tokenizer,
+            "task": "sft",
+        },
+        num_proc=8,
+        desc="Applying chat template",
+    )
     raw_datasets.set_format(type="pandas")
     raw_dataset_train = raw_datasets["train"][:]
     raw_dataset_train = raw_dataset_train.drop_duplicates(
-        subset=["prompt"], keep="first"
+        subset=["text"], keep="first"
     )
     raw_dataset_train = Dataset.from_pandas(raw_dataset_train)
     raw_datasets = DatasetDict({"train": raw_dataset_train})
