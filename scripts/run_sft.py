@@ -186,6 +186,8 @@ def main():
     )
     train_dataset = raw_datasets["train"]
     eval_dataset = raw_datasets["test"]
+    pprint(train_dataset)
+    pprint(eval_dataset)
 
     # eval_dataset = datasets.Dataset.from_dict(raw_datasets["train"][0])
 
