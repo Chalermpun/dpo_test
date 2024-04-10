@@ -182,6 +182,7 @@ def thai_sentiment_analysis_dataset_answer(
             raise ValueError(f"Invalid answer: {answer}")
 
     feeling = random.choice(feelings)
+    example["text"] = deEmojify(example["text"])
     example["answer_th"] = answer_sentiment(example["answer"])
     example["neu"] = feeling[1]
     example["pos"] = feeling[0]
@@ -236,9 +237,9 @@ def dataset_to_generator(dataset, pattern_name: str, source: str, task: str):
     for i, row in enumerate(tqdm(dataset, total=len(dataset))):
         pattern = patterns[i]
         data = {
-            "instruction": deEmojify(pattern["instruction"].format(**row)),
-            "input": deEmojify(pattern["input"].format(**row)),
-            "output": deEmojify(pattern["output"].format(**row)),
+            "instruction": pattern["instruction"].format(**row),
+            "input": pattern["input"].format(**row),
+            "output": pattern["output"].format(**row),
             "template": pattern,
             "source": source,
             "task": task,
@@ -797,10 +798,10 @@ if __name__ == "__main__":
     raw_datasets = add_new_dataset(flan_dataset_dict, ultrachat)
     raw_datasets.set_format(type="pandas")
     raw_dataset_train = raw_datasets["train"][:]
-    raw_dataset_train = raw_dataset_train.apply(
-        lambda x: x.astype(str).str.lower()
-    ).drop_duplicates(subset=["messages"], keep="first")
+    raw_dataset_train = raw_dataset_train.drop_duplicates(
+        subset=["prompt"], keep="first"
+    )
     raw_dataset_train = Dataset.from_pandas(raw_dataset_train)
     raw_datasets = DatasetDict({"train": raw_dataset_train})
-    raw_datasets.save_to_disk("/root/flan_dataset/flan_v2")
-    save_metadata(metadata, "./metadata/metadata_v2.txt")
+    raw_datasets.save_to_disk("/root/flan_dataset/flan_v3")
+    save_metadata(metadata, "./metadata/metadata_v3.txt")

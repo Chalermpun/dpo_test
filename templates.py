@@ -312,65 +312,65 @@ PATTERNS = {
         },
     ],
     "han": [
-        {
-            "instruction": "You are a chatbot. please answer the following question in Thai.",
-            "input": "Question: {q}",
-            "output": "{a}",
-        },
         {"instruction": "{q}", "input": "", "output": "{a}"},
-        {"instruction": "ตอบคำถามต่อไปนี้", "input": "ถาม: {q}", "output": "{a}"},
-        {"instruction": "ตอบคำถามต่อไปนี้", "input": "{q}", "output": "{a}"},
-        {"instruction": "จงตอบคำถาม: {q}", "input": "", "output": "{a}"},
-        {
-            "instruction": "Please answer the following question in Thai: {q}",
-            "input": "",
-            "output": "{a}",
-        },
-        {
-            "instruction": "Please answer the following question in Thai.",
-            "input": "{q}",
-            "output": "{a}",
-        },
-        {
-            "instruction": "จงทำตัวเป็นแชทบอท โดยตอบคำถามต่อไปนี้",
-            "input": "{q}",
-            "output": "{a}",
-        },
-        {
-            "instruction": "เธอคือเป็นแชทบอท และต้องตอบคำถามต่อไปนี้",
-            "input": "คำถาม: {q}",
-            "output": "{a}",
-        },
-        {
-            "instruction": "เธอคือเป็นแชทบอท และต้องตอบคำถาม: {q}",
-            "input": "",
-            "output": "{a}",
-        },
-        {
-            "instruction": "จงยกตัวอย่างคำถาม ที่สามารถตอบได้ด้วยคำตอบ '{a}'",
-            "input": "",
-            "output": "{q}",
-        },
-        {
-            "instruction": "Instruction: Answer the question in Thai.",
-            "input": "Question: {q}",
-            "output": "{a}",
-        },
-        {
-            "instruction": "Instruction: Please respond the answer in Thai.\nQuestion: {q}",
-            "input": "",
-            "output": "{a}",
-        },
-        {
-            "instruction": "นายคือผู้ช่วยฉัน ในการตอบคำถาม จากความรู้ทั้งหมดที่มี เพราะนายเก่งในการตอบคำถาม จงตอบคำถามต่อไปนี้",
-            "input": "ถาม: {q}",
-            "output": "{a}",
-        },
-        {
-            "instruction": "จงสร้างคำถามและคำตอบขึ้นมาเอง จากความรู้ที่มี",
-            "input": "นี่คือคำถาม: {q}",
-            "output": "{a}",
-        },
+        # {
+        #     "instruction": "You are a chatbot. please answer the following question in Thai.",
+        #     "input": "Question: {q}",
+        #     "output": "{a}",
+        # },
+        # {"instruction": "ตอบคำถามต่อไปนี้", "input": "ถาม: {q}", "output": "{a}"},
+        # {"instruction": "ตอบคำถามต่อไปนี้", "input": "{q}", "output": "{a}"},
+        # {"instruction": "จงตอบคำถาม: {q}", "input": "", "output": "{a}"},
+        # {
+        #     "instruction": "Please answer the following question in Thai: {q}",
+        #     "input": "",
+        #     "output": "{a}",
+        # },
+        # {
+        #     "instruction": "Please answer the following question in Thai.",
+        #     "input": "{q}",
+        #     "output": "{a}",
+        # },
+        # {
+        #     "instruction": "จงทำตัวเป็นแชทบอท โดยตอบคำถามต่อไปนี้",
+        #     "input": "{q}",
+        #     "output": "{a}",
+        # },
+        # {
+        #     "instruction": "เธอคือเป็นแชทบอท และต้องตอบคำถามต่อไปนี้",
+        #     "input": "คำถาม: {q}",
+        #     "output": "{a}",
+        # },
+        # {
+        #     "instruction": "เธอคือเป็นแชทบอท และต้องตอบคำถาม: {q}",
+        #     "input": "",
+        #     "output": "{a}",
+        # },
+        # {
+        #     "instruction": "จงยกตัวอย่างคำถาม ที่สามารถตอบได้ด้วยคำตอบ '{a}'",
+        #     "input": "",
+        #     "output": "{q}",
+        # },
+        # {
+        #     "instruction": "Instruction: Answer the question in Thai.",
+        #     "input": "Question: {q}",
+        #     "output": "{a}",
+        # },
+        # {
+        #     "instruction": "Instruction: Please respond the answer in Thai.\nQuestion: {q}",
+        #     "input": "",
+        #     "output": "{a}",
+        # },
+        # {
+        #     "instruction": "นายคือผู้ช่วยฉัน ในการตอบคำถาม จากความรู้ทั้งหมดที่มี เพราะนายเก่งในการตอบคำถาม จงตอบคำถามต่อไปนี้",
+        #     "input": "ถาม: {q}",
+        #     "output": "{a}",
+        # },
+        # {
+        #     "instruction": "จงสร้างคำถามและคำตอบขึ้นมาเอง จากความรู้ที่มี",
+        #     "input": "นี่คือคำถาม: {q}",
+        #     "output": "{a}",
+        # },
     ],
     "xp3x_enth": [  ## comment: xp3x เป็น QA ล้วนหรือ mixed MRC tasks
         {
