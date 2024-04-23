@@ -2,10 +2,9 @@
 
 | Dataset Name                                 | Source                                                                                                                                           | Quantity (row)                       | Task                | Domain       | License                                                                |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ | ------------------- | ------------ | ---------------------------------------------------------------------- |
-| XLSum (thai)                                 | [csebuetnlp/xlsum](https://huggingface.co/datasets/csebuetnlp/xlsum)                                                                             | 6.61k                                | Summarization       | News         | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)  |
 | ThaiSum                                      | [thaisum](https://huggingface.co/datasets/thaisum)                                                                                               | 359k                                 | Summarization       | News         | [MIT License](https://opensource.org/license/mit)                      |
 | scb-mt-en-th-2020                            | [scb_mt_enth_2020](https://huggingface.co/datasets/scb_mt_enth_2020)                                                                             | 1602k (801k enth, 801k then)         | Translation         | Mixed        | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.en) |
-| han-instruct-dataset-v1.0                    | [pythainlp/han-instruct-dataset-v1.0](https://huggingface.co/datasets/pythainlp/han-instruct-dataset-v1.0)                                       | 1.95k                                | Text Generation     | Mixed        | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.en) |
+| han-instruct-dataset-v2.0                    | [pythainlp/han-instruct-dataset-v2.0](https://huggingface.co/datasets/pythainlp/han-instruct-dataset-v2.0)                                       | 3.2k                                | Text Generation     | Mixed        | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.en) |
 | xP3x                                         | [CohereForAI/xP3x](https://huggingface.co/datasets/CohereForAI/xP3x)                                                                             | 6k                                   | Other               | Mixed        | [Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)  |
 | Open-Platypus                                | [garage-bAInd/Open-Platypus](https://huggingface.co/datasets/garage-bAInd/Open-Platypus)                                                         | 24.9k                                | Other               | Mixed        | Multiple Licenses                                                      |
 | Wisesight Sentiment Corpus                   | [wisesight_sentiment](https://huggingface.co/datasets/wisesight_sentiment)                                                                       | 21.15k                               | Text Classification | Social Media | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.en)   |
@@ -40,23 +39,22 @@ pie showData
 
 * [Create Dataset](#create-dataset)
 * [Datasets](#datasets)
-  * [1. XLSum (thai)](#1-xlsum-thai)
-  * [2. ThaiSum](#2-thaisum)
-  * [3. scb-mt-en-th-2020](#3-scb-mt-en-th-2020)
-  * [4. han-instruct-dataset-v1.0](#4-han-instruct-dataset-v10)
-  * [5. xP3x](#5-xp3x)
-  * [6. Open-Platypus](#6-open-platypus)
-  * [7. Wisesight Sentiment Corpus](#7-wisesight-sentiment-corpus)
-  * [8. Thai Food Recipe dataset v1.0](#8-thai-food-recipe-dataset-v10)
-  * [9. thai-wiki-dataset-v3](#9-thai-wiki-dataset-v3)
-  * [10. klongklon](#10-klongklon)
-  * [11. Thai Public Investment Consultant (IC) Exams](#11-thai-public-investment-consultant-ic-exams)
-  * [12. Thai USembassy](#12-thai-usembassy)
-  * [13. Wongnai Reviews](#13-wongnai-reviews)
-  * [14. Thai sentiment analysis dataset](#14-thai-sentiment-analysis-dataset)
-  * [15. Thai-English transliteration dictionary](#15-thai-english-transliteration-dictionary)
-  * [16. PRD News 30112023](#16-prd-news-30112023)
-  * [17. Aya Collection](#17-aya-collection)
+  * [1. ThaiSum](#1-thaisum)
+  * [2. scb-mt-en-th-2020](#2-scb-mt-en-th-2020)
+  * [3. han-instruct-dataset-v2.0](#3-han-instruct-dataset-v20)
+  * [4. xP3x](#4-xp3x)
+  * [5. Open-Platypus](#5-open-platypus)
+  * [6. Wisesight Sentiment Corpus](#6-wisesight-sentiment-corpus)
+  * [7. Thai Food Recipe dataset v1.0](#7-thai-food-recipe-dataset-v10)
+  * [8. thai-wiki-dataset-v3](#8-thai-wiki-dataset-v3)
+  * [9. klongklon](#9-klongklon)
+  * [10. Thai Public Investment Consultant (IC) Exams](#10-thai-public-investment-consultant-ic-exams)
+  * [11. Thai USembassy](#11-thai-usembassy)
+  * [12. Wongnai Reviews](#12-wongnai-reviews)
+  * [13. Thai sentiment analysis dataset](#13-thai-sentiment-analysis-dataset)
+  * [14. Thai-English transliteration dictionary](#14-thai-english-transliteration-dictionary)
+  * [15. PRD News 30112023](#15-prd-news-30112023)
+  * [16. Aya Collection](#16-aya-collection)
 
 <!-- vim-markdown-toc -->
 
@@ -70,32 +68,9 @@ python main.py
 
 ## Datasets
 
-### 1. XLSum (thai)
-
-a comprehensive and diverse dataset comprising 1.35 million professionally annotated article-summary pairs from BBC, extracted using a set of carefully designed heuristics. The dataset covers 45 languages ranging from low to high-resource, for many of which no public dataset is currently available. XL-Sum is highly abstractive, concise, and of high quality, as indicated by human and intrinsic evaluation.
-
-- Source: [csebuetnlp/xlsum](https://huggingface.co/datasets/csebuetnlp/xlsum)
-- Quantity (row): 6616
-- Task: summarization
-- License: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-- Domain: News
-
-<details close>
-  <summary>Example</summary>
-  <br>
-    <pre lang="python">
-    {
-    'id': 'international-40986185',
-    'url': 'https://www.bbc.com/thai/international-40986185',
-    'title': 'หญิงผู้โปรดปรานภูเขาไฟคุกรุ่น',
-    'summary': 'โรซาลี โลเปส นักภูเขาไฟวิทยาของนาซาโปรดปรานการปีนภูเขาไฟที่ยังคุกรุ่นอยู่ เพื่อไปชมการปะทุขนาดเล็ก โดยเธอได้เยือนภูเขาไฟที่คุกรุ่นในทุกทวีปทั่วโลกมาแล้ว 63 ลูก',
-    'text': 'โรซาลีเล่าว่า "คุณต้องรู้ถึงอันตรายต่าง ๆ และดูว่าคุณพอจะทำอะไรได้บ้าง ที่ปรึกษาของฉัน ตอนที่เราดู การปะทุขนาดเล็กของภูเขาไฟเอตนา มีเศษวัตถุขนาดเล็กตกลงมา เขาจะบอกเราให้เข้าไปเก็บตัวอย่าง คุณต้องได้รับการฝึกอย่างดี อย่าวิ่ง ให้อยู่กับที่ และมองขึ้นด้านบน ถ้ามีวัตถุขนาดใหญ่ตกลงมาใส่ ก็จะได้หลบออกด้านข้าง" สำหรับผู้ที่ต้องการชมภูเขาไฟคุกรุ่น โรซาลี แนะนำให้ไป วานูอาตู มีภูเขาไฟชื่อ ยาซูร์ ซึ่งมีการปะทุขนาดเล็ก คล้ายกับดอกไม้ไฟ มีความสวยงาม และเป็นภูเขาไฟที่ไปง่าย เธอบอกว่า สามารถขับรถขึ้นไปเกือบถึงปากปล่อง จากนั้นก็มีบันไดคอนกรีต ที่สามารถเดินขึ้นไปได้ และยังมีม้านั่งให้นั่งเล่นด้วย นอกจากภูเขาไฟบนโลก เธอยังพบภูเขาไฟที่คุกรุ่น 71 ลูก บนดวงจันทร์ไอโอของดาวพฤหัสฯ ด้วย'
-    }</pre>
-</details>
-
 ---
 
-### 2. ThaiSum
+### 1. ThaiSum
 
 ThaiSum is a large-scale corpus for Thai text summarization obtained from several online news websites namely Thairath, ThaiPBS, Prachathai, and The Standard. This dataset consists of over 350,000 article and summary pairs written by journalists.
 
@@ -121,7 +96,7 @@ ThaiSum is a large-scale corpus for Thai text summarization obtained from severa
 
 ---
 
-### 3. scb-mt-en-th-2020
+### 2. scb-mt-en-th-2020
 
 A Large English-Thai Parallel Corpus The primary objective of our work is to build a large-scale English-Thai dataset for machine translation. We construct an English-Thai machine translation dataset with over 1 million segment pairs, curated from various sources, namely news, Wikipedia articles, SMS messages, task-based dialogs, web-crawled data and government documents. Methodology for gathering data, building parallel texts and removing noisy sentence pairs are presented in a reproducible manner.
 
@@ -149,11 +124,11 @@ A Large English-Thai Parallel Corpus The primary objective of our work is to bui
 
 ---
 
-### 4. han-instruct-dataset-v1.0
+### 3. han-instruct-dataset-v2.0
 
 🪿 Han (ห่าน or goose) Instruct Dataset is a Thai instruction dataset by PyThaiNLP. It collect the instruction following in Thai from many source.
 
-- Source: [pythainlp/han-instruct-dataset-v1.0](https://huggingface.co/datasets/pythainlp/han-instruct-dataset-v1.0)
+- Source: [pythainlp/han-instruct-dataset-v2.0](https://huggingface.co/datasets/pythainlp/han-instruct-dataset-v2.0)
 - Quantity (row): 1951
 - Task: text generation
 - License: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.en)
@@ -171,7 +146,7 @@ A Large English-Thai Parallel Corpus The primary objective of our work is to bui
 
 ---
 
-### 5. xP3x
+### 4. xP3x
 
 xP3x (Crosslingual Public Pool of Prompts eXtended) is a collection of prompts & datasets across 277 languages & 16 NLP tasks. It contains all of xP3 + much more! It is used for training future contenders of mT0 & BLOOMZ at project Aya @C4AI
 
@@ -198,7 +173,7 @@ xP3x (Crosslingual Public Pool of Prompts eXtended) is a collection of prompts &
 
 ---
 
-### 6. Open-Platypus
+### 5. Open-Platypus
 
 This dataset is focused on improving LLM logical reasoning skills and was used to train the Platypus2 models. It is comprised of the following datasets, which were filtered using keyword search and then Sentence Transformers to remove questions with a similarity above 80%
 
@@ -265,7 +240,7 @@ This dataset is focused on improving LLM logical reasoning skills and was used t
 
 ---
 
-### 7. Wisesight Sentiment Corpus
+### 6. Wisesight Sentiment Corpus
 
 Wisesight Sentiment Corpus: Social media messages in Thai language with sentiment label (positive, neutral, negative, question)
 
@@ -287,7 +262,7 @@ Wisesight Sentiment Corpus: Social media messages in Thai language with sentimen
 
 ---
 
-### 8. Thai Food Recipe dataset v1.0
+### 7. Thai Food Recipe dataset v1.0
 
 The Thai Food Recipe dataset is a collection of Thai recipes from old Thai books and social networks.
 
@@ -309,7 +284,7 @@ The Thai Food Recipe dataset is a collection of Thai recipes from old Thai books
 
 ---
 
-### 9. thai-wiki-dataset-v3
+### 8. thai-wiki-dataset-v3
 
 This dataset collects all Thai Wikimedia project that cleaned all text for Thai language. Example: [Wikipedia](https://th.wikipedia.org/) , [Wikiquote](https://th.wikiquote.org/), [Wikibooks](https://th.wikibooks.org/), [Wikisource](https://th.wikisource.org/), and [Wiktionary](https://th.wiktionary.org/).
 
@@ -332,7 +307,7 @@ This dataset collects all Thai Wikimedia project that cleaned all text for Thai 
 
 ---
 
-### 10. klongklon
+### 9. klongklon
 
 This dataset was created from collecting poems in various literature. It contains more than 50000 poems. Which consists of poems that are `กลอน8` and `โคลงสี่สุภาพ` Prepared to create a model for composing Thai poems.
 
@@ -355,7 +330,7 @@ This dataset was created from collecting poems in various literature. It contain
 
 ---
 
-### 11. Thai Public Investment Consultant (IC) Exams
+### 10. Thai Public Investment Consultant (IC) Exams
 
 This dataset comprises a collection of exam questions and answers from the Thai Public Investment Consultant (IC) Examinations. It's a valuable resource for developing and evaluating question-answering systems in the finance sector.
 
@@ -384,7 +359,7 @@ This dataset comprises a collection of exam questions and answers from the Thai 
 
 ---
 
-### 12. Thai USembassy
+### 11. Thai USembassy
 
 This dataset collect all Thai & English news from [U.S. Embassy Bangkok](https://th.usembassy.gov/news-events/) .
 
@@ -409,7 +384,7 @@ This dataset collect all Thai & English news from [U.S. Embassy Bangkok](https:/
 
 ---
 
-### 13. Wongnai Reviews
+### 12. Wongnai Reviews
 
 The Wongnai Review dataset contains restaurant reviews and ratings, almost entirely in Thai language. The reviews are in 5 classes ranging from 1 to 5 stars. This dataset was featured in a [Kaggle challenge](https://www.kaggle.com/c/wongnai-challenge-review-rating-prediction/overview)
 
@@ -431,7 +406,7 @@ The Wongnai Review dataset contains restaurant reviews and ratings, almost entir
 
 ---
 
-### 14. Thai sentiment analysis dataset
+### 13. Thai sentiment analysis dataset
 
 This dataset consists of three CSV files, each containing annotated texts with positive (pos) and negative (neg) tags. `tcas61.csv` focuses on texts related to the TCAS 61 university entrance system, annotated by Mr. Wanapong Phattiyaphaibun. `review_shopping.csv` includes reviews from an online shopping website in 2018, also annotated by Mr. Wanapong Phattiyaphaibun. Lastly, `general-amy.csv` contains general texts from 2018, annotated by Kochaporn Ratchatawuttimongkol.
 
@@ -453,7 +428,7 @@ This dataset consists of three CSV files, each containing annotated texts with p
 
 ---
 
-### 15. Thai-English transliteration dictionary
+### 14. Thai-English transliteration dictionary
 
 This project is Thai-English transliteration dictionary. It is store words for Thai-English transliteration pairs. Thai words are English words from English to Thai by transliteration in Thai.
 
@@ -476,7 +451,7 @@ This project is Thai-English transliteration dictionary. It is store words for T
 
 ---
 
-### 16. PRD News 30112023
+### 15. PRD News 30112023
 
 Thai News from The Government Public Relations Department, Office of the Prime Minister. We are collect Thai News from Open Data.
 
@@ -503,7 +478,7 @@ Thai News from The Government Public Relations Department, Office of the Prime M
 
 ---
 
-### 17. Aya Collection
+### 16. Aya Collection
 
 The Aya Collection is a massive multilingual collection consisting of 513 million instances of prompts and completions covering a wide range of tasks. This collection incorporates instruction-style templates from fluent speakers and applies them to a curated list of datasets, as well as translations of instruction-style datasets into 101 languages. Aya Dataset, a human-curated multilingual instruction and response dataset, is also part of this collection. See our paper for more details regarding the collection.
 

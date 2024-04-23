@@ -459,7 +459,6 @@ def create_flan_dataset(split="train"):
     ### End add new dataset by Beer ######
 
     ################# load dataset from huggingface
-    xlsum = load_dataset("csebuetnlp/xlsum", "thai", split=split, cache_dir=cache_dir)
 
     thaisum = load_dataset("thaisum", split=split, cache_dir=cache_dir)
 
@@ -625,7 +624,6 @@ def create_flan_dataset(split="train"):
 
     ################# reformat
     # summarization
-    xlsum_list = reformat(xlsum, "xlsum", "csebuetnlp/xlsum", "summarization")
     thaisum_list = reformat(thaisum, "thaisum", "thaisum", "summarization")
 
     # translation
@@ -714,7 +712,6 @@ def create_flan_dataset(split="train"):
     )
 
     flan_list = (
-        xlsum_list
         + thaisum_list
         + scb_enth_list
         + han_list
