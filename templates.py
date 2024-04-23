@@ -1041,4 +1041,56 @@ PATTERNS = {
             "output": "{output}",
         },
     ],
+    "iapp_wiki_qa_squad": [
+        {
+            "instruction": "Instruction: จงอ่านบริบท และตอบคำถาม โดยจะคำตอบ ต้องมาจากบริบท",
+            "input": "บริบท: {context}\nคำถาม: {question}",
+            "output": "{answers}",
+        },
+        {
+            "instruction": "From the context, Respond the question.",
+            "input": "Context: {context}\nQuestion: {question}",
+            "output": "{answers}",
+        },
+        {
+            "instruction": "กำหนดบทความพื้นหลังให้",
+            "input": "พื้นหลัง: {context}\nจงตอบคำถาม: {question}",
+            "output": "{answers}",
+        },
+        {
+            "instruction": "Read the context and answer the question",
+            "input": "Context: {context}\nQuestion: '{question}'",
+            "output": "{answers}",
+        },
+        {
+            "instruction": "From Background, Please answer this question: {question}",
+            "input": "Background: {context}",
+            "output": "{answers}",
+        },
+        {
+            "instruction": "อ่านบริบท แล้วตอบคำถาม: {question}",
+            "input": "บริบท: {context}",
+            "output": "{answers}",
+        },
+        {
+            "instruction": "จากเนื้อหา จงตอบคำถามนี้: {question}",
+            "input": "เนื้อหา: {context}",
+            "output": "{answers}",
+        },
+        {
+            "instruction": "อ่านและทำความเข้าใจ บทความก่อนที่จะตอบคำถาม จากบทความนั้น",
+            "input": "บทความ: {context}\n\nQ: {question}",
+            "output": "{answers}",
+        },
+        {
+            "instruction": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\nInstruction:\nAnswer the question according to the context.",
+            "input": "Context:\n{context}\nQuestion:\n{question}",
+            "output": "{answers}",
+        },
+        {
+            "instruction": "นายคือผู้ช่วยฉัน ในการอ่านข้อความ แล้วตอบคำถามออกมาให้ถูกต้อง โดยคำตอบจะอยู่ในเนื้อหา บทความ นายต้องอ่านให้รอบคอบ และตอบให้ถูกต้องครบถ้วน เพราะนายเก่งในการตอบคำถาม",
+            "input": "เนื้อหาบทความ: {context}\n\nQuestion: จากเนื้อหาบทความ คำถามคือ '{question}'",
+            "output": "{answers}",
+        },
+    ],
 }

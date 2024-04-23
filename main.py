@@ -36,6 +36,11 @@ def deterministic_random(seed: int) -> random_normal.Random:
     return random_normal.Random(seed)
 
 
+def iapp_wiki_map(example):
+    example["answers"] = example["answers_text"]
+    return example
+
+
 def load_jsonl_datasets(directory):
     jsonl_files = [file for file in os.listdir(directory) if file.endswith(".jsonl")]
     data_files = [os.path.join(directory, file) for file in jsonl_files]
@@ -341,6 +346,18 @@ def create_flan_dataset(split="train"):
 
     cache_dir = "/workspace/flan_dataset/cache"
 
+    han_dataset = load_dataset(
+        "pythainlp/han-instruct-dataset-v2.0", split=split, cache_dir=cache_dir
+    )
+
+    han_list = reformat(han_dataset, "han", "han-dataset-v2", "text-generation")
+
+    iapp = load_dataset(
+        "Rasu23/iapp_wiki_qa_squad_cleaned", split=split, cache_dir=cache_dir
+    )
+    iapp = iapp.map(iapp_wiki_map)
+    iapp_list = reformat(iapp, "iapp_wiki_qa_squad", "iapp-dataset", "text-generation")
+
     math_50k = pd.read_json(
         "https://github.com/AGI-Edgerunners/LLM-Adapters/raw/main/ft-training_set/math_50k.json"
     )
@@ -391,15 +408,6 @@ def create_flan_dataset(split="train"):
     flan = flan.select(random_flan_ids)
     cot_list = reformat(cot, "flan_v2", "cot_v2", "generation")
     flan_list = reformat(flan, "flan_v2", "flan_v2", "generation")
-
-    # flan_v2_dialog = load_dataset("SirNeural/flan_v2", split="train")
-    # flan_v2_dialog = flan_v2_dialog.filter(lambda example: example["task"] == "dialog")
-    # random_test_ids = random.sample(range(len(flan_v2_dialog)), k=100000)
-    # flan_v2_dialog = flan_v2_dialog.select(random_test_ids)
-    # print(flan_v2_dialog)
-    # flan_v2_dialog_list = reformat(
-    #     flan_v2_dialog, "flan_v2", "flan_v2_dialog", "generation"
-    # )
 
     alt_dataset = load_dataset(
         "alt", "alt-parallel", split=split, cache_dir=cache_dir
@@ -466,12 +474,6 @@ def create_flan_dataset(split="train"):
         "scb_mt_enth_2020", "enth", split=split, cache_dir=cache_dir
     )
     scb_enth = scb_enth.map(scb_translation, load_from_cache_file=False)
-
-    han = pd.read_excel("/workspace/sealion_old/examples/han_instruct-v2.xls")
-    han = Dataset.from_pandas(han)
-    han_dataset = DatasetDict()
-    han_dataset["train"] = han
-    han_dataset["train"] = han_dataset["train"].remove_columns("Unnamed: 0")
 
     all_file_xp3x = read_file_xp3x()
     xp3x = load_dataset("json", data_files=all_file_xp3x, split=split)
@@ -632,7 +634,6 @@ def create_flan_dataset(split="train"):
     )
     xp3x_list = reformat(xp3x, "xp3x_enth", "CohereForAI/xP3x", "other")
 
-    han_list = reformat(han_dataset, "han", "han-dataset", "text-generation")
     platypus_list = reformat(
         platypus, "platypus", "garage-bAInd/Open-Platypus", "other"
     )
@@ -712,7 +713,7 @@ def create_flan_dataset(split="train"):
     )
 
     flan_list = (
-        + thaisum_list
+        thaisum_list
         + scb_enth_list
         + han_list
         + xp3x_list
@@ -721,7 +722,6 @@ def create_flan_dataset(split="train"):
         + thai_food_list
         + thai_wiki_dataset_v3_list
         + klongklon_list
-        # + thai_investment_consultant_licensing_exams_list
         + thai_usembassy_list
         + wongnai_reviews_list
         + thai_sentiment_analysis_dataset_list
@@ -740,6 +740,7 @@ def create_flan_dataset(split="train"):
         + cot_list
         + math_50k_list
         + commonsense_170k_list
+        + iapp_list
     )
     return flan_list
 
@@ -834,10 +835,8 @@ if __name__ == "__main__":
     )
     raw_datasets.set_format(type="pandas")
     raw_dataset_train = raw_datasets["train"][:]
-    raw_dataset_train = raw_dataset_train.drop_duplicates(
-        subset=["text"], keep="first"
-    )
+    raw_dataset_train = raw_dataset_train.drop_duplicates(subset=["text"], keep="first")
     raw_dataset_train = Dataset.from_pandas(raw_dataset_train)
     raw_datasets = DatasetDict({"train": raw_dataset_train})
-    raw_datasets.save_to_disk("/root/flan_dataset/flan_v3")
-    save_metadata(metadata, "./metadata/metadata_v3.txt")
+    raw_datasets.save_to_disk("/root/flan_dataset/flan_v4")
+    save_metadata(metadata, "./metadata/metadata_v4.txt")

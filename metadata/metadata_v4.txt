@@ -1,0 +1,34 @@
++----+-------------------------------------------------------------------------------+---------+
+|    | name                                                                          |    rows |
+|----+-------------------------------------------------------------------------------+---------|
+|  0 | ultrachat_200k                                                                |  207865 |
+|  1 | CohereForAI/aya_collection/aya_dataset                                        |     724 |
+|  2 | CohereForAI/aya_collection/templated_xlel_wd                                  |   10926 |
+|  3 | CohereForAI/xP3x                                                              |  303148 |
+|  4 | alt_dataset                                                                   |   18088 |
+|  5 | commonsense_170k                                                              |  170420 |
+|  6 | cot_v2                                                                        |  373681 |
+|  7 | dataset_tiny                                                                  |  363775 |
+|  8 | dataset_wangchanglm                                                           |  308994 |
+|  9 | flan_v2                                                                       |  100000 |
+| 10 | garage-bAInd/Open-Platypus                                                    |   19079 |
+| 11 | han-dataset-v2                                                                |    3200 |
+| 12 | https://github.com/PyThaiNLP/thai-sentiment-analysis-dataset/                 |     341 |
+| 13 | https://github.com/wannaphong/thai-english-transliteration-dictionary/        |    3868 |
+| 14 | iapp-dataset                                                                  |    5745 |
+| 15 | math_50k                                                                      |   50000 |
+| 16 | pythainlp/klongklon                                                           |   57600 |
+| 17 | pythainlp/prd_news_30112023                                                   |  242985 |
+| 18 | pythainlp/thai-wiki-dataset-v3                                                |  196533 |
+| 19 | pythainlp/thai_food_v1.0                                                      |     159 |
+| 20 | pythainlp/thai_usembassy                                                      |     615 |
+| 21 | scb_mt_enth_2020                                                              |  801402 |
+| 22 | ted_talks_iwslt2014                                                           |    1258 |
+| 23 | ted_talks_iwslt2015                                                           |    1658 |
+| 24 | ted_talks_iwslt2016                                                           |    1988 |
+| 25 | thaisum                                                                       |  358868 |
+| 26 | wiki_lingua                                                                   |   30174 |
+| 27 | wisesight_sentiment                                                           |   21152 |
+| 28 | wongnai_reviews                                                               |   40000 |
+| 29 | =================================== total =================================== | 3694246 |
++----+-------------------------------------------------------------------------------+---------+
