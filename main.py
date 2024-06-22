@@ -417,53 +417,53 @@ def create_flan_dataset(split="train"):
         alt_dataset, "scb_mt_en_th", "alt_dataset", "translation"
     )
 
-    ted_talks_iwslt2014 = load_dataset(
-        "ted_talks_iwslt",
-        language_pair=("en", "th"),
-        year="2014",
-        split=split,
-        cache_dir=cache_dir,
-    )  # .select(range(number_rand))
-    ted_talks_iwslt2015 = load_dataset(
-        "ted_talks_iwslt",
-        language_pair=("en", "th"),
-        year="2015",
-        split=split,
-        cache_dir=cache_dir,
-    )  # .select(range(number_rand))
-    ted_talks_iwslt2016 = load_dataset(
-        "ted_talks_iwslt",
-        language_pair=("en", "th"),
-        year="2016",
-        split=split,
-        cache_dir=cache_dir,
-    )  # .select(range(number_rand))
-
-    ted_talks_iwslt2014 = ted_talks_iwslt2014.map(
-        scb_translation, load_from_cache_file=False
-    )
-    ted_talks_iwslt2014_list = reformat(
-        ted_talks_iwslt2014, "scb_mt_en_th", "ted_talks_iwslt2014", "translation"
-    )
-    ted_talks_iwslt2015 = ted_talks_iwslt2015.map(
-        scb_translation, load_from_cache_file=False
-    )
-    ted_talks_iwslt2015_list = reformat(
-        ted_talks_iwslt2015, "scb_mt_en_th", "ted_talks_iwslt2015", "translation"
-    )
-    ted_talks_iwslt2016 = ted_talks_iwslt2016.map(
-        scb_translation, load_from_cache_file=False
-    )
-    ted_talks_iwslt2016_list = reformat(
-        ted_talks_iwslt2016, "scb_mt_en_th", "ted_talks_iwslt2016", "translation"
-    )
-    wiki_lingua = load_dataset(
-        "GEM/wiki_lingua", "en_th", split=split, cache_dir=cache_dir
-    )  # .select(range(number_rand))
-    wiki_lingua = wiki_lingua.map(wiki_lingua_mep, load_from_cache_file=False)
-    wiki_lingua_list = reformat(
-        wiki_lingua, "wiki_lingua", "wiki_lingua", "summarization"
-    )
+    # ted_talks_iwslt2014 = load_dataset(
+    #     "ted_talks_iwslt",
+    #     language_pair=("en", "th"),
+    #     year="2014",
+    #     split=split,
+    #     cache_dir=cache_dir,
+    # )  # .select(range(number_rand))
+    # ted_talks_iwslt2015 = load_dataset(
+    #     "ted_talks_iwslt",
+    #     language_pair=("en", "th"),
+    #     year="2015",
+    #     split=split,
+    #     cache_dir=cache_dir,
+    # )  # .select(range(number_rand))
+    # ted_talks_iwslt2016 = load_dataset(
+    #     "ted_talks_iwslt",
+    #     language_pair=("en", "th"),
+    #     year="2016",
+    #     split=split,
+    #     cache_dir=cache_dir,
+    # )  # .select(range(number_rand))
+    #
+    # ted_talks_iwslt2014 = ted_talks_iwslt2014.map(
+    #     scb_translation, load_from_cache_file=False
+    # )
+    # ted_talks_iwslt2014_list = reformat(
+    #     ted_talks_iwslt2014, "scb_mt_en_th", "ted_talks_iwslt2014", "translation"
+    # )
+    # ted_talks_iwslt2015 = ted_talks_iwslt2015.map(
+    #     scb_translation, load_from_cache_file=False
+    # )
+    # ted_talks_iwslt2015_list = reformat(
+    #     ted_talks_iwslt2015, "scb_mt_en_th", "ted_talks_iwslt2015", "translation"
+    # )
+    # ted_talks_iwslt2016 = ted_talks_iwslt2016.map(
+    #     scb_translation, load_from_cache_file=False
+    # )
+    # ted_talks_iwslt2016_list = reformat(
+    #     ted_talks_iwslt2016, "scb_mt_en_th", "ted_talks_iwslt2016", "translation"
+    # )
+    # wiki_lingua = load_dataset(
+    #     "GEM/wiki_lingua", "en_th", split=split, cache_dir=cache_dir
+    # )  # .select(range(number_rand))
+    # wiki_lingua = wiki_lingua.map(wiki_lingua_mep, load_from_cache_file=False)
+    # wiki_lingua_list = reformat(
+    #     wiki_lingua, "wiki_lingua", "wiki_lingua", "summarization"
+    # )
     ### End add new dataset by Beer ######
 
     ################# load dataset from huggingface
@@ -525,17 +525,17 @@ def create_flan_dataset(split="train"):
         split=split,
         cache_dir=cache_dir,
     )
-    thai_investment_consultant_licensing_exams = (
-        thai_investment_consultant_licensing_exams.filter(
-            lambda example: example["input"] != None
-        )
-    )
-
-    thai_investment_consultant_licensing_exams = (
-        thai_investment_consultant_licensing_exams.filter(
-            lambda example: str(example["result"]) in example["input"]
-        )
-    )
+    # thai_investment_consultant_licensing_exams = (
+    #     thai_investment_consultant_licensing_exams.filter(
+    #         lambda example: example["input"] != None
+    #     )
+    # )
+    #
+    # thai_investment_consultant_licensing_exams = (
+    #     thai_investment_consultant_licensing_exams.filter(
+    #         lambda example: str(example["result"]) in example["input"]
+    #     )
+    # )
 
     # thai_investment_consultant_licensing_exams = (
     #     thai_investment_consultant_licensing_exams.map(
@@ -730,10 +730,10 @@ def create_flan_dataset(split="train"):
         + aya_dataset_list
         + aya_collection_templated_xlel_wd_list
         + alt_dataset_list
-        + ted_talks_iwslt2014_list
-        + ted_talks_iwslt2015_list
-        + ted_talks_iwslt2016_list
-        + wiki_lingua_list
+        # + ted_talks_iwslt2014_list
+        # + ted_talks_iwslt2015_list
+        # + ted_talks_iwslt2016_list
+        # + wiki_lingua_list
         + dataset_wangchanglm_list
         + dataset_tiny_list
         + flan_list
@@ -838,5 +838,5 @@ if __name__ == "__main__":
     raw_dataset_train = raw_dataset_train.drop_duplicates(subset=["text"], keep="first")
     raw_dataset_train = Dataset.from_pandas(raw_dataset_train)
     raw_datasets = DatasetDict({"train": raw_dataset_train})
-    raw_datasets.save_to_disk("/root/flan_dataset/flan_v4")
-    save_metadata(metadata, "./metadata/metadata_v4.txt")
+    raw_datasets.save_to_disk("/root/flan_dataset/flan_v5")
+    save_metadata(metadata, "./metadata/metadata_v5.txt")
